@@ -241,13 +241,20 @@ class ChessBoardWidget(Widget):
             self._moving_piece = '.'
 
     def update_position(self, move):
+        """
         print "pos: "
         print self.app.chessboard.position
         print "move: "
         print move
         print "trying to make move: " + move[0:2] + "-" + move[2:4]
         print self.board
-        self.board.move(Move(move[0:2],move[2:4]))
+        """
+        move_obj = Move(move[0:2],move[2:4])
+        move_result = self.board.move(move_obj)
+
+        if move_result is True:
+            self.last_move_san = move_obj.pgn
+
         return True
 
     """
@@ -398,6 +405,7 @@ class ChessBoardWidget(Widget):
         super(ChessBoardWidget, self).__init__(**kwargs)
         self.app = app
         self.board = Board()
+        self.last_move_san = None
         self.light = (1, 0.808, 0.620)
         # self.light =  (Image(LIGHT_SQUARE+"fir-lite.jpg"))
         self.dark =(0.821, 0.545, 0.278)
@@ -780,7 +788,6 @@ class DataItem(object):
         self.text = text
         self.is_selected = is_selected
 
-
 class Chess_app(App):
     def open_create_index(self, f):
         folder_tokens = f[0].split('/')
@@ -904,7 +911,7 @@ class Chess_app(App):
         database_panel.add_widget(self.db_open_item)
         database_panel.add_widget(self.ref_db_open_item)
 
-        fen_input = TextInput(text="", focus=True, multiline=False, use_bubble = True)
+        fen_input = TextInput(text="", focus=False, multiline=False, use_bubble = True)
 
         def on_level_value(slider, value):
             # self.level_label.text=value
@@ -1225,7 +1232,7 @@ class Chess_app(App):
 
         Clock.schedule_interval(self.update_clocks, 1)
 
-        grandparent = GridLayout(size_hint=(1,1), cols=1, orientation = 'vertical')
+        #grandparent = GridLayout(size_hint=(1,1), cols=1, orientation = 'vertical')
         parent = BoxLayout(spacing=10)
         # box = BoxLayout(spacing=10, padding=(10,10))
         self.grid = ChessBoardWidget(self)
@@ -1345,6 +1352,7 @@ class Chess_app(App):
 
         # parent.add_widget(Label(size_hint=(0.5,1)))
         parent.add_widget(self.info_grid)
+        """
         grandparent.add_widget(parent)
         database_grid = BoxLayout(size_hint=(1, 0.4), orientation='vertical')
 
@@ -1398,21 +1406,14 @@ class Chess_app(App):
         database_grid.add_widget(database_header)
         database_grid.add_widget(self.database_list_view)
         grandparent.add_widget(database_grid)
+        """
         self.refresh_board()
 
         platform = kivy.utils.platform()
-        """
-        if self.is_desktop():
-            self._keyboard = Window.request_keyboard(
-                self._keyboard_closed, self)
-            self._keyboard.bind(on_key_down=self._on_keyboard_down)
-            # Clock.schedule_interval(self.update_engine_output, 0.01)
-
-            # self.start_engine_thread()
-        """
         sm = ScreenManager(transition=SlideTransition())
         board_screen = Screen(name='main')
-        board_screen.add_widget(grandparent)
+        #board_screen.add_widget(grandparent)
+        board_screen.add_widget(parent)
         sm.add_widget(board_screen)
 
         settings_screen = SettingsScreen(name='settings')
@@ -1821,11 +1822,6 @@ class Chess_app(App):
             self.chessboard = self.chessboard.previous_node
             self.refresh_board(update=False)
 
-    def _keyboard_closed(self):
-#        print 'My keyboard have been closed!'
-        self._keyboard.unbind(on_key_down=self.back)
-        self._keyboard = None
-
     def parse_bestmove(self, line):
 #        print "line:{0}".format(line)
         best_move = None
@@ -2103,24 +2099,6 @@ class Chess_app(App):
             else:
                 self.lcd.printString(message, 0, 0)
             sleep(0.1)
-
-    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
-        if self.root.current != "main":
-            return False
-#        print self.root.current
-        # Keycode is composed of an integer + a string
-        # If we hit escape, release the keyboard
-        if keycode[1] == 'escape':
-            keyboard.release()
-
-        if keycode[1] == 'left':
-            self.back(None)
-        elif keycode[1] == 'right':
-            self.fwd(None)
-
-        # Return True to accept the key. Otherwise, it will be used by
-        # the system.
-        # return False
 
     def select_variation(self, i):
         if True:
@@ -2628,9 +2606,9 @@ class Chess_app(App):
         filler = ''
         # current turn is toggle from previous
         # add in a dot if is now white to move
-        if self.chessboard.position.turn == 'w':
+        if self.grid.board.turn == 'white':
             filler = '.'
-        san = self.chessboard.san
+        san = self.grid.last_move_san
         if figurine:
             san = self.convert_san_to_figurine(san)
         return u"{0}.{1} {2}".format(self.chessboard.half_move_num / 2, filler, san)
@@ -2650,7 +2628,9 @@ class Chess_app(App):
         #     self.fill_chess_board(self.squares[i], squares[p])
         # self.grid._update_position(self.chessboard.position.fen, "")
 
-        if self.chessboard.san:
+        #if self.chessboard.san:
+        if self.grid.last_move_san:
+            print "last move: " + str(self.grid.last_move_san)
             self.prev_move.text = self.get_prev_move()
 
 

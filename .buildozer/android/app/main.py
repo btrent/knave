@@ -904,7 +904,7 @@ class Chess_app(App):
         database_panel.add_widget(self.db_open_item)
         database_panel.add_widget(self.ref_db_open_item)
 
-        fen_input = TextInput(text="", focus=True, multiline=False, use_bubble = True)
+        fen_input = TextInput(text="", focus=False, multiline=False, use_bubble = True)
 
         def on_level_value(slider, value):
             # self.level_label.text=value
@@ -1225,7 +1225,7 @@ class Chess_app(App):
 
         Clock.schedule_interval(self.update_clocks, 1)
 
-        grandparent = GridLayout(size_hint=(1,1), cols=1, orientation = 'vertical')
+        #grandparent = GridLayout(size_hint=(1,1), cols=1, orientation = 'vertical')
         parent = BoxLayout(spacing=10)
         # box = BoxLayout(spacing=10, padding=(10,10))
         self.grid = ChessBoardWidget(self)
@@ -1345,6 +1345,7 @@ class Chess_app(App):
 
         # parent.add_widget(Label(size_hint=(0.5,1)))
         parent.add_widget(self.info_grid)
+        """
         grandparent.add_widget(parent)
         database_grid = BoxLayout(size_hint=(1, 0.4), orientation='vertical')
 
@@ -1398,21 +1399,14 @@ class Chess_app(App):
         database_grid.add_widget(database_header)
         database_grid.add_widget(self.database_list_view)
         grandparent.add_widget(database_grid)
+        """
         self.refresh_board()
 
         platform = kivy.utils.platform()
-        """
-        if self.is_desktop():
-            self._keyboard = Window.request_keyboard(
-                self._keyboard_closed, self)
-            self._keyboard.bind(on_key_down=self._on_keyboard_down)
-            # Clock.schedule_interval(self.update_engine_output, 0.01)
-
-            # self.start_engine_thread()
-        """
         sm = ScreenManager(transition=SlideTransition())
         board_screen = Screen(name='main')
-        board_screen.add_widget(grandparent)
+        #board_screen.add_widget(grandparent)
+        board_screen.add_widget(parent)
         sm.add_widget(board_screen)
 
         settings_screen = SettingsScreen(name='settings')
@@ -1821,11 +1815,6 @@ class Chess_app(App):
             self.chessboard = self.chessboard.previous_node
             self.refresh_board(update=False)
 
-    def _keyboard_closed(self):
-#        print 'My keyboard have been closed!'
-        self._keyboard.unbind(on_key_down=self.back)
-        self._keyboard = None
-
     def parse_bestmove(self, line):
 #        print "line:{0}".format(line)
         best_move = None
@@ -2103,24 +2092,6 @@ class Chess_app(App):
             else:
                 self.lcd.printString(message, 0, 0)
             sleep(0.1)
-
-    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
-        if self.root.current != "main":
-            return False
-#        print self.root.current
-        # Keycode is composed of an integer + a string
-        # If we hit escape, release the keyboard
-        if keycode[1] == 'escape':
-            keyboard.release()
-
-        if keycode[1] == 'left':
-            self.back(None)
-        elif keycode[1] == 'right':
-            self.fwd(None)
-
-        # Return True to accept the key. Otherwise, it will be used by
-        # the system.
-        # return False
 
     def select_variation(self, i):
         if True:
