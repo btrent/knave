@@ -1,5 +1,7 @@
 from threading import Thread, RLock
 import traceback
+import datetime
+import os
 import sys
 import random
 
@@ -7,10 +9,6 @@ sys.platform = 'linux2'
     
 import kivy
 from kivy.config import ConfigParser
-
-# from kivy.config import Config
-# Config.set('graphics', 'fullscreen', 0)
-# Config.write()
 
 from kivy_util import ScrollableLabel
 from kivy_util import ScrollableGrid
@@ -49,9 +47,6 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.animation import Animation
 from kivy.properties import ListProperty
 
-#from kivy.core.clipboard import Clipboard
-
-#from ChessBoard import ChessBoard
 from chesstools import Board, Move
 from sets import Set
 import itertools as it
@@ -59,34 +54,15 @@ from operator import attrgetter
 from time import sleep
 from chess import polyglot_opening_book
 
-THINKING_TIME = "[color=000000]Thinking..\n[size=24]{0}    [b]{1}[/size][/b][/color]"
-THINKING = "[color=000000][b][size=16]Thinking..[/size][/b][/color]"
-
-#try:
-#    import libchess
-#except ImportError:
-#    from chess import libchess
-
-#from libchess import Position
-# from chess.libchess import SanNotation
-# from chess.libchess import MoveError
-#from libchess import Move
 from chess.game import Game
 from chess.game_node import PIECE_FONT_MAP
 from chess import PgnFile
-#from chess import PgnIndex
 from chess.game_node import GameNode
-#from libchess import Piece
-#from libchess import Square
 from chess.game_header_bag import GameHeaderBag
-#import stockfish as sf
 
-# DGT
-import os
-import datetime
-#import leveldb
-#from pydgt import DGTBoard
-#from pydgt import FEN
+
+THINKING_TIME = "[color=000000]Thinking..\n[size=24]{0}    [b]{1}[/size][/b][/color]"
+THINKING = "[color=000000][b][size=16]Thinking..[/size][/b][/color]"
 
 INDEX_TOTAL_GAME_COUNT = "total_game_count"
 
@@ -806,15 +782,6 @@ class DataItem(object):
 
 
 class Chess_app(App):
-    def validate_device(self, text):
-        if not os.path.exists(text):
-            popup = Popup(title='Sorry, DGT Device NOT found!',
-                content=Label(text="DGT device {0} was NOT found".format(text)),
-                size_hint=(None, None), size=(400, 400))
-            popup.open()
-            return False
-        return True
-
     def open_create_index(self, f):
         folder_tokens = f[0].split('/')
         leveldb_path = None
@@ -919,59 +886,6 @@ class Chess_app(App):
         def go_to_setup_board(value):
             self.root.current = 'setup_board'
 
-
-        def on_dgt_dev_input(instance):
-#            print instance.text
-            text = self.dgt_dev_input.text
-            self.validate_device(text)
-
-        def on_dgt_sound(instance, value):
-            self.dgt_clock_sound = value
-
-        def poll_dgt():
-            self.dgt_thread = KThread(target=self.dgtnix.poll)
-            self.dgt_thread.daemon = True
-            self.dgt_thread.start()
-
-        def on_dgt_connect(instance, value):
-			pass
-	"""
-        #            print "bind"
-        #            print instance
-        #            print value
-        #            print self.dgt_dev_input.text
-        # Load the library
-            if not value:
-                # if self.dgtnix:
-                #     self.dgtnix.Close()
-                self.dgt_connected = False
-                self.dgt_thread.kill()
-                # if self.dgt_thread.isAlive():
-                #     self.dgt_thread._Thread__stop()
-
-            else:
-                self.dgtnix = DGTBoard(self.dgt_dev_input.text, send_board=False)
-                self.dgtnix.subscribe(self.dgt_probe)
-                poll_dgt()
-                if arduino:
-                    from nanpy.lcd import Lcd
-                    from nanpy import SerialManager
-                    from nanpy import ArduinoApi
-                    connection = SerialManager(device='/dev/cu.usbmodem411')
-                    self.arduino = ArduinoApi(connection=connection)
-                    Clock.schedule_interval(self.process_arduino_button, 1)
-
-                    # time.sleep(3)
-                    self.lcd = Lcd([8, 9, 4, 5, 6, 7 ], [16, 2], connection=connection)
-                    self.lcd.printString('Kivy Chess')
-
-                if not self.dgtnix:
-                    print "Unable to connect to the device on {0}".format(self.device)
-                else:
-                    print "The board was found"
-                    self.dgt_connected = True
-
-
         settings_panel = Settings() #create instance of Settings
 
         engine_panel = SettingsPanel(title="Engine") #create instance of left side panel
@@ -990,82 +904,6 @@ class Chess_app(App):
         database_panel.add_widget(self.db_open_item)
         database_panel.add_widget(self.ref_db_open_item)
 
-        dgt_panel = SettingsPanel(title="DGT")
-        setup_dgt_item = SettingItem(panel=dgt_panel, title="Input DGT Device (/dev/..)") #create instance of one item in left side panel
-#        setup_dgt_item.bind(on_release=on_dgt_dev_input)
-        self.dgt_dev_input = TextInput(text="/dev/cu.usbserial-00004006", focus=True, multiline=False, use_bubble = True)
-        self.dgt_dev_input.bind(on_text_validate=on_dgt_dev_input)
-
-        setup_dgt_item.add_widget(self.dgt_dev_input)
-#        setup_dgt_item.add_widget(connect_dgt_bt)
-        dgt_switch = Switch()
-        dgt_switch.bind(active=on_dgt_connect)
-
-        connect_dgt_item = SettingItem(panel=dgt_panel, title="Status") #create instance of one item in left side panel
-        connect_dgt_item.add_widget(dgt_switch)
-
-        sound_switch = Switch()
-        sound_switch.bind(active=on_dgt_sound)
-
-        clock_dgt_item = SettingItem(panel=dgt_panel, title="DGT Clock Sound") #create instance of one item in left side panel
-        clock_dgt_item.add_widget(sound_switch)
-
-
-        dgt_panel.add_widget(setup_dgt_item)
-        dgt_panel.add_widget(connect_dgt_item)
-        dgt_panel.add_widget(clock_dgt_item)
-
-        fen_input = TextInput(text="", focus=True, multiline=False, use_bubble = True)
-#        print Clipboard['application/data']
-	"""
-
-	"""
-	Does this go here?
-	"""
-        settings_panel = Settings() #create instance of Settings
-
-        engine_panel = SettingsPanel(title="Engine") #create instance of left side panel
-        board_panel = SettingsPanel(title="Board") #create instance of left side panel
-        setup_pos_item = SettingItem(panel=board_panel, title="Input FEN") #create instance of one item in left side panel
-        setup_board_item = SettingItem(panel=board_panel, title="Setup Board") #create instance of one item in left side panel
-        setup_board_item.bind(on_release=go_to_setup_board)
-
-        database_panel = SettingsPanel(title="Database") #create instance of left side panel
-        self.db_open_item = SettingItem(panel=board_panel, title="Open Database") #create instance of one item in left side panel
-        self.db_open_item.bind(on_release=self.open_database)
-
-        self.ref_db_open_item = SettingItem(panel=board_panel, title="Open Reference Database") #create instance of one item in left side panel
-        self.ref_db_open_item.bind(on_release=self.open_database)
-
-        database_panel.add_widget(self.db_open_item)
-        database_panel.add_widget(self.ref_db_open_item)
-
-	"""
-        dgt_panel = SettingsPanel(title="DGT")
-        setup_dgt_item = SettingItem(panel=dgt_panel, title="Input DGT Device (/dev/..)") #create instance of one item in left side panel
-#        setup_dgt_item.bind(on_release=on_dgt_dev_input)
-        self.dgt_dev_input = TextInput(text="/dev/cu.usbserial-00004006", focus=True, multiline=False, use_bubble = True)
-        self.dgt_dev_input.bind(on_text_validate=on_dgt_dev_input)
-
-        setup_dgt_item.add_widget(self.dgt_dev_input)
-#        setup_dgt_item.add_widget(connect_dgt_bt)
-        dgt_switch = Switch()
-        dgt_switch.bind(active=on_dgt_connect)
-
-        connect_dgt_item = SettingItem(panel=dgt_panel, title="Status") #create instance of one item in left side panel
-        connect_dgt_item.add_widget(dgt_switch)
-	"""
-        sound_switch = Switch()
-        sound_switch.bind(active=on_dgt_sound)
-	"""
-        clock_dgt_item = SettingItem(panel=dgt_panel, title="DGT Clock Sound") #create instance of one item in left side panel
-        clock_dgt_item.add_widget(sound_switch)
-
-
-        dgt_panel.add_widget(setup_dgt_item)
-        dgt_panel.add_widget(connect_dgt_item)
-        dgt_panel.add_widget(clock_dgt_item)
-	"""
         fen_input = TextInput(text="", focus=True, multiline=False, use_bubble = True)
 
         def on_level_value(slider, value):
@@ -1080,10 +918,7 @@ class Chess_app(App):
                 self.start_pos_changed = True
                 self.custom_fen = instance.text
 
-        ##            print 'The widget', instance.text
-        #
         fen_input.bind(on_text_validate=on_fen_input)
-
 
         setup_pos_item.add_widget(fen_input)
         level_item = SettingItem(panel=engine_panel, title="Level") #create instance of one item in left side panel
@@ -1102,9 +937,7 @@ class Chess_app(App):
 
         settings_panel.add_widget(board_panel)
         settings_panel.add_widget(database_panel)
-	"""
-        settings_panel.add_widget(dgt_panel)
-	"""
+
         settings_panel.add_widget(engine_panel) #add left side panel itself to the settings menu
 
         def go_back():
@@ -1116,19 +949,6 @@ class Chess_app(App):
         settings_panel.on_close=go_back
 
         return settings_panel # show the settings interface
-#
-#        parent = BoxLayout(size_hint=(1, 1))
-#        bt = Button(text='Settings')
-#        parent.add_widget(bt)
-#
-#        def go_back(instance):
-#            self.root.current = 'main'
-#
-#        back_bt = Button(text='Back to Main')
-#        back_bt.bind(on_press=go_back)
-#        parent.add_widget(back_bt)
-#
-#        return parent
 
     def create_chess_board(self, squares, type="main"):
         if type == "main":
@@ -1183,31 +1003,6 @@ class Chess_app(App):
 
         return grid
 
-    # def try_dgt_legal_moves(self, from_fen, to_fen):
-    #     dgt_first_tok = to_fen.split()[0]
-    #     for m in Position(from_fen).get_legal_moves():
-    #         pos = Position(from_fen)
-    #         mi = pos.make_move(m)
-    #         cur_first_tok = str(pos).split()[0]
-    #         if cur_first_tok == dgt_first_tok:
-    #             self.dgt_fen = to_fen
-    #             self.process_move(move=str(m))
-    #
-    #             return True
-
-    def try_dgt_legal_moves(self, from_fen, to_fen):
-        to_fen_first_tok = to_fen.split()[0]
-        for m in sf.legal_moves(from_fen):
-            cur_fen = sf.get_fen(from_fen,[m])
-            cur_fen_first_tok = str(cur_fen).split()[0]
-#            print "cur_token:{0}".format(cur_fen_first_tok)
-#            print "to_token:{0}".format(to_fen_first_tok)
-            if cur_fen_first_tok == to_fen_first_tok:
-                self.dgt_fen = to_fen
-                self.process_move(move=str(m))
-                return True
-
-
     def update_clocks(self, *args):
         if self.engine_mode == ENGINE_PLAY:
             if self.lcd and self.computer_move_FEN_reached:
@@ -1239,51 +1034,6 @@ class Chess_app(App):
                         self.engine_score.children[0].text = YOURTURN_MENU.format("Not available", self.eng_eval, self.format_time_str(self.time_white), self.format_time_str(self.time_black))
                 else:
                     self.engine_score.children[0].text = YOURTURN_MENU.format("hidden", "hidden", self.format_time_str(self.time_white), self.format_time_str(self.time_black))
-
-                # Print engine move on DGT XL clock
-
-    def write_lcd_prev_move(self):
-        if True:
-            return
-        if self.chessboard.san:
-            if len(self.chessboard.variations) > 0:
-                message = " (Game)"
-            else:
-                message = " (New)"
-            self.write_to_lcd(self.get_prev_move(figurine=False) + message, clear=True)
-
-            # if self.chessboard.previous_node:
-            #     self.write_to_lcd(self.chessboard.san, clear=True)
-            # if len(self.chessboard.variations)>0:
-            #     if self.lcd:
-            #         self.write_to_lcd(str(self.chessboard.variations[0].san),clear=True)
-
-    def dgt_probe(self, attr, *args):
-        if attr.type == FEN:
-            new_dgt_fen = attr.message
-#            print "length of new dgt fen: {0}".format(len(new_dgt_fen))
-#            print "new_dgt_fen just obtained: {0}".format(new_dgt_fen)
-            if self.dgt_fen and new_dgt_fen:
-                if new_dgt_fen != self.dgt_fen:
-                    if self.engine_mode == ENGINE_PLAY:
-                        self.computer_move_FEN_reached = False
-
-                    if not self.try_dgt_legal_moves(self.chessboard.position.fen, new_dgt_fen):
-                        dgt_fen_start = new_dgt_fen.split()[0]
-                        curr_fen_start = self.chessboard.position.fen.split()[0]
-                        if curr_fen_start == dgt_fen_start and self.engine_mode == ENGINE_PLAY:
-                            self.computer_move_FEN_reached = True
-
-                        if self.chessboard.previous_node:
-                            prev_fen_start = self.chessboard.previous_node.position.fen.split()[0]
-                            if dgt_fen_start == prev_fen_start:
-                                self.back('dgt')
-                    if self.engine_mode != ENGINE_PLAY and self.engine_mode != ENGINE_ANALYSIS:
-                        if self.lcd:
-                            self.write_lcd_prev_move()
-
-            elif new_dgt_fen:
-                self.dgt_fen = new_dgt_fen
 
     def update_grid_border(self, instance, width, height):
         with self.grid.canvas.before:
@@ -1427,7 +1177,6 @@ class Chess_app(App):
         self.engine_comp_color = 'b'
         self.engine_level = '20'
         self.time_last = None
-        self.dgt_time = None
         self.time_white = 0
         self.time_inc_white = 0
         self.time_black = 0
@@ -1438,29 +1187,7 @@ class Chess_app(App):
         self.db_sort_criteria = []
         self.show_hint = False
         self.speak_move_queue = []
-#        PGN Index test
-#        index = PgnIndex("kasparov-deep-blue-1997.pgn")
-##
-#        #print len(index)
-#        first = index.get_pos(5)
-##        second = index.get_pos(6)
-#        #print second
-#        f = open("kasparov-deep-blue-1997.pgn")
-#        f.seek(first)
-#        line = 1
-#        lines = []
-#        while line:
-#            line = f.readline()
-##            pos = f.tell()
-#            #print pos
-##            if pos<=second:
-#            lines.append(line)
-##            else:
-##                break
-#
-        # games = PgnFile.open("test/french_watson.pgn")
-##        first_game = games[5]
-#
+
         self.chessboard = Game()
         self.chessboard_root = self.chessboard
         self.ponder_move = None
@@ -1475,9 +1202,6 @@ class Chess_app(App):
 
         self.train_eng_score = {}
 
-#        self.setup_chessboard = Position()
-#        self.setup_chessboard.clear_board()
-
         self.squares = []
         self.setup_board_squares = []
         self.use_engine = False
@@ -1485,15 +1209,9 @@ class Chess_app(App):
         self.stop_called = False
         # self.engine_running = False
         self.spoke_hint = False
-	"""
-        sf.add_observer(self.update_engine_output)
-        # print sf.getOptions()
-        sf.set_option('OwnBook','true')
-	"""
 
         # Make this an option later
         self.use_tb = False
-       # sf.set_option('SyzygyPath', '/Users/shiv/chess/tb/syzygy')
 
         self.book_display = True
         self.database_display = False
@@ -1502,39 +1220,9 @@ class Chess_app(App):
         self.last_touch_up_move = None
         self.last_touch_down_setup = None
         self.last_touch_up_setup = None
-	"""
-        self.book = polyglot_opening_book.PolyglotOpeningBook('book.bin')
-	"""
         self.book = None
         # self.book = PolyglotOpeningBook("book.bin")
 
-        self.dgt_connected = False
-        self.dgtnix = None
-        self.dgt_fen = None
-        self.dgt_clock_sound = False
-
-	"""
-        # user book
-        try:
-            from chess.leveldict import LevelJsonDict
-            # import leveldb
-            # from chess.leveldict import LevelDict
-            self.user_book = LevelJsonDict('book/custom/watson.db')
-            self.ref_db_index_book = leveldb.LevelDB('book/polyglot_index.db')
-            self.db_index_book = None
-#            self.pgn_index = LevelJsonDict('book/test_pgn_index.db')
-
-
-#            print "Created userbook"
-        except ImportError:
-            self.user_book = None
-            self.db_index_book = None
-#            self.pgn_index = None
-            print "cannot import leveldb userbook"
-
-	"""
-
-        # Clock.schedule_interval(self.dgt_probe, 1)
         Clock.schedule_interval(self.update_clocks, 1)
 
         grandparent = GridLayout(size_hint=(1,1), cols=1, orientation = 'vertical')
@@ -1583,9 +1271,11 @@ class Chess_app(App):
         save_bt.bind(on_press=self.save)
         self.b.add_widget(save_bt)
 
+        """
         settings_bt = Button(markup=True, text='Setup')
         settings_bt.bind(on_press=self.go_to_settings)
         self.b.add_widget(settings_bt)
+        """
 
         # box.add_widget()
         parent.add_widget(self.grid)
@@ -1712,7 +1402,6 @@ class Chess_app(App):
 
         platform = kivy.utils.platform()
         """
-        BEN
         if self.is_desktop():
             self._keyboard = Window.request_keyboard(
                 self._keyboard_closed, self)
@@ -1726,8 +1415,6 @@ class Chess_app(App):
         board_screen.add_widget(grandparent)
         sm.add_widget(board_screen)
 
-        """
-        BEN
         settings_screen = SettingsScreen(name='settings')
         settings_screen.add_widget(self.generate_settings())
 
@@ -1737,7 +1424,7 @@ class Chess_app(App):
         setup_widget = self.create_chess_board(self.setup_board_squares, type="setup")
         # setup_widget = ChessBoardWidget(self)
             # self.create_chess_board(self.squares)
-        """
+
 
         def go_to_main_screen(value):
             if self.root:
@@ -1751,15 +1438,11 @@ class Chess_app(App):
                 # print "white to move"
                 self.setup_chessboard.turn = 'w'
 
+        """
         def render_setup_board(bt):
             if bt.text == "Clear":
                 self.setup_chessboard.clear_board()
 #                clearBoard()
-            elif bt.text == "DGT":
-                if self.dgt_fen:
-                    fen = self.dgt_fen.split()[0]
-                    fen+=" {0} KQkq - 0 1".format(self.setup_chessboard.turn)
-                    self.setup_chessboard = Position(fen)
 
             else:
                 self.setup_chessboard.reset()
@@ -1816,7 +1499,7 @@ class Chess_app(App):
                 self.refresh_board()
                 self.root.current = 'main'
 
-        """
+
         BEN
         wtm = ToggleButton(text="White to move", state="down", on_press=setup_board_change_tomove)
         setup_widget.add_widget(wtm)
@@ -1826,9 +1509,6 @@ class Chess_app(App):
 
         initial = Button(text="Initial", on_press=render_setup_board)
         setup_widget.add_widget(initial)
-
-        dgt = Button(text="DGT", on_press=render_setup_board)
-        setup_widget.add_widget(dgt)
 
         validate = Button(text="OK", on_press=validate_setup_board)
         setup_widget.add_widget(validate)
@@ -2354,49 +2034,6 @@ class Chess_app(App):
                         if can_line:
                             output.can_line = can_line
 
-                        if self.dgt_connected and self.dgtnix:
-                            tokens = line.split()
-
-                            line_index = tokens.index('pv')
-                            if line_index > -1:
-                                pv = self.get_san(tokens[line_index+1:])
-                                # print "pv : {0}".format(pv)
-
-                                if len(pv)>0:
-
-                                        # first_mv = pv[0]
-                                    # if self.use_tb and score == 151:
-                                    #     score = 'TB: 1-0'
-                                    # if self.use_tb and score == -151:
-                                    #     score = 'TB: 0-1'
-                                        # separator = ".." if self.turn == BLACK else ""
-                                        # print self.generate_move_list(pv, eval=score, start_move_num=len(self.move_list)+1)
-
-                        # output = self.generate_move_list(pv, eval=score, start_move_num=len(self.move_list)+1)
-                                    depth, score = self.get_score(line)
-
-                                    output = self.generate_move_list(pv, eval=score, start_move_num=self.chessboard.half_move_num)
-                                    self.write_to_lcd(output, clear=True)
-
-                                    # print "Using DGT"
-                                    # Display score on the DGT clock
-                                    # print line
-                                    # depth, score = self.get_score(line)
-                                    # print "depth:{0}".format(depth)
-                                    #
-                                    # print "score:{0}".format(score)
-
-                            # if score.startswith("mate"):
-                            #     score = score[4:]
-                            #     score = "m "+score
-                            # score = score.replace("-", "n")
-                            # self.dgtnix.SendToClock(self.format_str_for_dgt(score), False, True)
-                                # sleep(1)
-                            # output = self.generate_move_list(raw_line, eval=score, start_move_num=self.chessboard.half_move_num)
-                                # print output
-                                # self.dgtnix.SendToClock(self.format_move_for_dgt(first_mv), False, False)
-                    # print "Before cleaned line"
-
             elif self.engine_mode == ENGINE_PLAY:
                 if self.engine_computer_move:
                     best_move, self.ponder_move = self.parse_bestmove(line)
@@ -2407,13 +2044,9 @@ class Chess_app(App):
                         self.eng_eval = score
                     # self.update_time(color=self.engine_comp_color)
                     if best_move:
-                        if self.dgt_connected and self.dgtnix:
-                            san_move = self.get_san([best_move])[0]
-                            self.write_to_lcd(san_move, clear=True)
                         self.process_move(best_move)
                         self.time_add_increment(color=self.engine_comp_color)
 
-                            # self.dgtnix.SendToClock(self.format_move_for_dgt(best_move), self.dgt_clock_sound, False)
                         self.show_hint = False
                         self.spoke_hint = False
                         self.ponder_move_san = None
@@ -2470,19 +2103,6 @@ class Chess_app(App):
             else:
                 self.lcd.printString(message, 0, 0)
             sleep(0.1)
-
-    def format_str_for_dgt(self, s):
-        while len(s)>6:
-            s = s[:-1]
-        while len(s) < 6:
-            s = " " + s
-        return s
-
-    def format_move_for_dgt(self, s):
-        mod_s = s[:2]+' '+s[2:]
-        if len(mod_s)<6:
-            mod_s+=" "
-        return mod_s
 
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
         if self.root.current != "main":
