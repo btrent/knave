@@ -552,65 +552,18 @@ class ChessBoardWidget(Widget):
         else:
             return
 
-		#TODO P1 check move validity
-        if (self.is_legal_move(move)):
-            # print "legal check"
-            self._moving_piece_pos[0], self._moving_piece_pos[1] = self._to_coordinates(
-                self._moving_piece_from) if self._animate_from_origin else (touch.x - self.square_size / 2, touch.y - self.square_size / 2)
-            animation = Animation(_moving_piece_pos=self._to_coordinates(square), duration=0.1, t='in_out_sine')
-            animation.move = move
-            animation.bind(on_complete=self._update_after_animation)
-            animation.start(self)
-            self.app.hint_move = None
-            # print('MOVE : ' + move)
-        else:
-            if (self._moving_piece == 'P' and square < 8) or (self._moving_piece == 'p' and square > 55):
-
-                if (self.always_promote_to_queen):
-					move = self.square_name(self._moving_piece_from) + self.square_name(square) + 'q'
-                else:
-	                #Show a popup for promotions
-	                layout = GridLayout(cols=2)
-
-	                def choose(button):
-	                    popup.dismiss()
-	                    move = self.square_name(self._moving_piece_from) + self.square_name(square) + button.piece
-	                    if move in sf.legal_moves(self.fen):
-	                        # print "Promotion move"
-	                        # print move
-	                        self.app.process_move(move)
-	                        self.app.hint_move = None
-	                        # self._game.moves.append(move)
-	                    else:
-	                        self._draw_board()
-	                        self._draw_pieces()
-	
-	                for p in 'qrbn':
-	                    btn = Button(text=self._front_textures[p], font_name='img/ChessCases.ttf', font_size=self.board_size / 8)
-	                    btn.piece = p
-	                    btn.bind(on_release=lambda b: choose(b))
-	                    layout.add_widget(btn)
-	                popup = Popup(title='Promote to', content=layout, size_hint=(.5, .5))
-	                popup.open()
-            else:  # Illegal move
-                # print "illegal move sine wave"
-                self._moving_piece_pos[0] = touch.x - self.square_size / 2
-                self._moving_piece_pos[1] = touch.y - self.square_size / 2
-                animation = Animation(_moving_piece_pos=self._to_coordinates(self._moving_piece_from), duration=0.1,
-                                      t='in_out_sine')
-                animation.bind(on_complete=self._update_after_animation)
-                animation.start(self)
+        # print "legal check"
+        self._moving_piece_pos[0], self._moving_piece_pos[1] = self._to_coordinates(
+            self._moving_piece_from) if self._animate_from_origin else (touch.x - self.square_size / 2, touch.y - self.square_size / 2)
+        animation = Animation(_moving_piece_pos=self._to_coordinates(square), duration=0.1, t='in_out_sine')
+        animation.move = move
+        animation.bind(on_complete=self._update_after_animation)
+        animation.start(self)
+        self.app.hint_move = None
+        # print('MOVE : ' + move)
 
         touch.ungrab(self)
         return True
-
-    def is_legal_move(self, move):
-        #if move in sf.legal_moves(self.fen):
-        if True:
-            return True
-	
-        return False
-
 
 class Touch(object):
     def __init__(self, x, y, **kwargs):
@@ -921,7 +874,6 @@ class Chess_app(App):
 
         def on_fen_input(instance):
             if self.chessboard.setFEN(instance.text):
-                self.refresh_board()
                 self.start_pos_changed = True
                 self.custom_fen = instance.text
 
@@ -959,9 +911,9 @@ class Chess_app(App):
 
     def create_chess_board(self, squares, type="main"):
         if type == "main":
-            grid = GridLayout(cols=8, rows=8, spacing=1, padding=(10,10))
+            board_widget = GridLayout(cols=8, rows=8, spacing=1, padding=(10,10))
         else:
-            grid = GridLayout(cols=8, rows=12, spacing=1, size_hint=(1, 1))
+            board_widget = GridLayout(cols=8, rows=12, spacing=1, size_hint=(1, 1))
 
         for i, name in enumerate(SQUARES):
             bt = ChessSquare(keep_ratio=True, size_hint_x=1, size_hint_y=1)
@@ -989,7 +941,7 @@ class Chess_app(App):
                 bt.bind(on_touch_up=self.touch_up_setup)
 
             squares.append(bt)
-            grid.add_widget(bt)
+            board_widget.add_widget(bt)
 
 
         if type!="main":
@@ -1006,9 +958,9 @@ class Chess_app(App):
                 bt.bind(on_touch_down=self.touch_down_setup)
                 bt.bind(on_touch_up=self.touch_up_setup)
 
-                grid.add_widget(bt)
+                board_widget.add_widget(bt)
 
-        return grid
+        return board_widget
 
     def update_clocks(self, *args):
         if self.engine_mode == ENGINE_PLAY:
@@ -1043,7 +995,7 @@ class Chess_app(App):
                     self.engine_score.children[0].text = YOURTURN_MENU.format("hidden", "hidden", self.format_time_str(self.time_white), self.format_time_str(self.time_black))
 
     def update_grid_border(self, instance, width, height):
-        with self.grid.canvas.before:
+        with self.board_widget.canvas.before:
             # grid.canvas.clear()
             Color(0.5, 0.5, 0.5)
             Rectangle(size=Window.size)
@@ -1235,7 +1187,7 @@ class Chess_app(App):
         #grandparent = GridLayout(size_hint=(1,1), cols=1, orientation = 'vertical')
         parent = BoxLayout(spacing=10)
         # box = BoxLayout(spacing=10, padding=(10,10))
-        self.grid = ChessBoardWidget(self)
+        self.board_widget = ChessBoardWidget(self)
             # self.create_chess_board(self.squares)
 
         # Dummy params for listener
@@ -1285,7 +1237,7 @@ class Chess_app(App):
         """
 
         # box.add_widget()
-        parent.add_widget(self.grid)
+        parent.add_widget(self.board_widget)
 
         self.info_grid = GridLayout(cols=1, rows=4, spacing=5, padding=(8, 8), orientation='vertical')
         self.info_grid.add_widget(self.b)
@@ -1407,7 +1359,6 @@ class Chess_app(App):
         database_grid.add_widget(self.database_list_view)
         grandparent.add_widget(database_grid)
         """
-        self.refresh_board()
 
         platform = kivy.utils.platform()
         sm = ScreenManager(transition=SlideTransition())
@@ -1531,7 +1482,6 @@ class Chess_app(App):
         if GameNode.positions.has_key(pos_hash):
             # print "Move found!"
             self.chessboard = GameNode.positions[pos_hash]
-            self.refresh_board()
 
     def is_position_inf_eval(self, mv):
         for p in pos_evals:
@@ -1678,7 +1628,6 @@ class Chess_app(App):
         self.chessboard = games[0]
         # print self.chessboard.headers.headers
         self.chessboard_root = self.chessboard
-        self.refresh_board()
 
         # self.game_score = games[0]
 
@@ -1705,10 +1654,6 @@ class Chess_app(App):
             # print ev
             # print int_eval_symbol[ev]
             self.update_book_panel(ev=ev)
-        else:
-#            self.add_try_variation(str(mv).encode("utf-8"))
-            # self.chessboard.addTextMove(mv)
-            self.refresh_board()
 
     def stop_engine(self):
         sf.stop()
@@ -1798,8 +1743,6 @@ class Chess_app(App):
                 self.add_try_variation(mv)
             """
 
-        self.refresh_board()
-
     def is_desktop(self):
         platform = kivy.utils.platform()
 #        print platform
@@ -1812,7 +1755,6 @@ class Chess_app(App):
     def new(self, obj):
         self.chessboard = Game()
         self.chessboard_root = self.chessboard
-        self.refresh_board(update=True)
 
     def comment(self, obj):
         print "Comment button clicked"
@@ -1820,7 +1762,6 @@ class Chess_app(App):
     def back(self, obj):
         if self.chessboard.previous_node:
             self.chessboard = self.chessboard.previous_node
-            self.refresh_board(update=False)
 
     def parse_bestmove(self, line):
 #        print "line:{0}".format(line)
@@ -2001,10 +1942,10 @@ class Chess_app(App):
             # self.grid._update_position(None, self.chessboard.position.fen)
             if self.hint_move:
                 # print "hint_move : {0}".format(self.hint_move)
-                self.grid._draw_board()
-                self.grid._draw_pieces()
-                self.grid._highlight_square_name(self.hint_move[-2:])
-                self.grid._highlight_square_name(self.hint_move[:2])
+                self.board_widget._draw_board()
+                self.board_widget._draw_pieces()
+                self.board_widget._highlight_square_name(self.hint_move[-2:])
+                self.board_widget._highlight_square_name(self.hint_move[:2])
 
         # print line
 
@@ -2016,10 +1957,10 @@ class Chess_app(App):
                 if out_score:
                     first_mv, can_line, raw_line, cleaned_line = out_score
                     if first_mv:
-                        self.grid._draw_board()
-                        self.grid._draw_pieces()
-                        self.grid._highlight_square_name(first_mv[-2:])
-                        self.grid._highlight_square_name(first_mv[:2])
+                        self.board_widget._draw_board()
+                        self.board_widget._draw_pieces()
+                        self.board_widget._highlight_square_name(first_mv[-2:])
+                        self.board_widget._highlight_square_name(first_mv[:2])
                         self.engine_highlight_move = first_mv
                         if cleaned_line:
                             # print "Cleaned line"
@@ -2106,7 +2047,6 @@ class Chess_app(App):
         try:
             i = int(i)
             self.chessboard = self.chessboard.variations[i]
-            self.refresh_board(update=False)
         except IndexError:
             pass
 
@@ -2116,7 +2056,6 @@ class Chess_app(App):
             return
         try:
             self.chessboard = self.chessboard.variations[0]
-            self.refresh_board(update=False)
         except IndexError:
             pass
             # TODO: log error if in debug mode
@@ -2236,10 +2175,10 @@ class Chess_app(App):
         to_rank = move[3]
         move_obj = Move(move[0:2],move[2:4])
 
-        if from_rank == '7' and to_rank == '8' and str(self.grid.board.get_square(move_obj.source)) == 'P':
+        if from_rank == '7' and to_rank == '8' and str(self.board_widget.board.get_square(move_obj.source)) == 'P':
             return True
 
-        if from_rank == '2' and to_rank == '1' and str(self.grid.board.get_square(move_obj.source)) == 'p':
+        if from_rank == '2' and to_rank == '1' and str(self.board_widget.board.get_square(move_obj.source)) == 'p':
             return True
 
         return False
@@ -2276,10 +2215,6 @@ class Chess_app(App):
                 san = self.get_san([move])[0]
  #               self.add_try_variation(move)
                 self.speak_move(san)
-                self.refresh_board(spoken=True)
-            else:
- #               self.add_try_variation(move)
-                self.refresh_board()
         except Exception, e:
             print e
             raise
@@ -2606,119 +2541,12 @@ class Chess_app(App):
         filler = ''
         # current turn is toggle from previous
         # add in a dot if is now white to move
-        if self.grid.board.turn == 'white':
+        if self.board_widget.board.turn == 'white':
             filler = '.'
-        san = self.grid.last_move_san
+        san = self.board_widget.last_move_san
         if figurine:
             san = self.convert_san_to_figurine(san)
         return u"{0}.{1} {2}".format(self.chessboard.half_move_num / 2, filler, san)
-
-    def refresh_board(self, update = True, spoken = False):
-        # print "refresh_board"
-        # flatten lists into one list of 64 squares
-#        squares = [item for sublist in self.chessboard.getBoard() for item in sublist]
-        squares = self.chessboard.position
-        # print self.chessboard.position.fen
-        # print self.chessboard.position.get_ep_square()
-        try:
-            self.grid._update_position(None, self.chessboard.position.fen)
-        except:
-            pass
-        # for i, p in enumerate(SQUARES):
-        #     self.fill_chess_board(self.squares[i], squares[p])
-        # self.grid._update_position(self.chessboard.position.fen, "")
-
-        #if self.chessboard.san:
-        if self.grid.last_move_san:
-            print "last move: " + str(self.grid.last_move_san)
-            self.prev_move.text = self.get_prev_move()
-
-
-#        all_moves = self.chessboard.getAllTextMoves()
-#        print self.chessboard_root.game_score()
-
-        if update:
-            all_moves = self.chessboard_root.game_score(figurine=True)
-            if all_moves:
-                self.game_score.children[0].text=u"[color=000000]{0}[/color]".format(all_moves)
-        """
-        if self.variation_dropdown:
-            self.variation_dropdown.dismiss()
-        if len(self.chessboard.variations) > 1:
-            self.variation_dropdown = DropDown()
-            for i,v in enumerate(self.chessboard.variations):
-            # for index in range(len(self.chessboard.variations)):
-                btn = Button(id=str(i), text='{0}'.format(v.san), size_hint_y=None, height=20)
-                # btn = Button(text='Value %d' % index)
-
-
-                # for each button, attach a callback that will call the select() method
-                # on the dropdown. We'll pass the text of the button as the data of the
-                # selection.
-                btn.bind(on_release=lambda btn: self.select_variation(btn.id))
-                # print i
-
-                # then add the button inside the dropdown
-                self.variation_dropdown.add_widget(btn)
-            self.variation_dropdown.open(self.b)
-
-        # print self.chessboard.get_prev_moves()
-        """
-
-        # print "Before stopping"
-        # if self.engine_running:
-        if self.engine_mode != ENGINE_PLAY:
-			pass
-			"""
-            sf.stop()
-            sleep(0.05)
-			"""
-
-        if self.chessboard_root.headers.headers.has_key('FEN') and len(self.chessboard_root.headers.headers['FEN']) > 1:
-            self.custom_fen = self.chessboard_root.headers.headers['FEN']
-
-        if self.custom_fen:
-            self.pyfish_fen = self.custom_fen
-            # sf.position(self.custom_fen, self.chessboard.get_prev_moves())
-        else:
-            self.pyfish_fen = 'startpos'
-            # sf.position('startpos', self.chessboard.get_prev_moves())
-
-        if self.use_engine:
-            if self.start_pos_changed:
-                # self.uci_engine.sendFen(self.custom_fen)
-                self.start_pos_changed = False
-
-            if self.engine_mode == ENGINE_ANALYSIS:
-                # if self.engine_running:
-                sf.go(fen=self.pyfish_fen, moves=self.chessboard.get_prev_moves(), infinite=True)
-                # print "Started engine"
-                # self.engine_running = True
-            elif self.engine_mode == ENGINE_TRAINING:
-                sf.set_option('skill level', '17')
-                sf.go(fen=self.pyfish_fen, moves=self.chessboard.get_prev_moves(), depth=15)
-            else:
-                # print "computer_move: "
-                # print self.engine_computer_move
-                if self.engine_mode == ENGINE_PLAY and self.engine_computer_move:
-                    # print "before go play"
-                    # sf.go(movetime=10)
-                    sf.go(fen=self.pyfish_fen, moves=self.chessboard.get_prev_moves(), wtime=int(self.time_white*1000), btime=int(self.time_black*1000), winc=int(self.time_inc_white*1000), binc=int(self.time_inc_black*1000))
-                    # print "Started engine"
-                    # self.engine_running = True
-
-                    # self.uci_engine.requestMove(wtime=self.time_white, btime=self.time_black,
-                    #     winc=self.time_inc_white, binc=self.time_inc_black)
-
-        self.update_book_panel()
-        # print self.speak_move_queue
-        if spoken:
-            if len(self.speak_move_queue)>0:
-                for e in self.speak_move_queue:
-                    self.speak_move_queue = []
-                    os.system("say "+e)
-        # self.update_database_panel()
-#        self.update_user_book_panel()
 
 if __name__ == '__main__':
     Chess_app().run()
