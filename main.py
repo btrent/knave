@@ -345,7 +345,7 @@ class ChessBoardWidget(Widget):
                         Rectangle(pos=(
                             self.bottom_left[0] + file * self.square_size, self.bottom_left[1] + row * self.square_size), texture=self.light_img.texture, size=(self.square_size, self.square_size))
 
-    def on_size(self, instance, value):
+    def on_size(self, instance=None, value=None):
         self.square_size = int(min(self.size) / 8)
         self.board_size = self.square_size * 8
         self.bottom_left = (int((self.width - self.board_size) / 2 + self.pos[0]), int((self.height - self.board_size) / 2 + self.pos[1]))
@@ -421,6 +421,7 @@ class ChessBoardWidget(Widget):
         self._background_textures = { 'K':'k', 'Q':'l', 'R':'m', 'B':'n', 'N':'o', 'P':'p', 'k':'q', 'q':'r', 'r':'s', 'b':'t', 'n':'u', 'p':'v'}
         self._front_textures = { 'K':'H', 'Q':'I', 'R':'J', 'B':'K', 'N':'L', 'P':'M', 'k':'N', 'q':'O', 'r':'P', 'b':'Q', 'n':'R', 'p':'S'}
         self.bind(_moving_piece_pos=self._animate_piece)
+        self.on_size()
         Window.bind(mouse_pos=self.mouse_callback)
 
 
@@ -909,11 +910,15 @@ class Chess_app(App):
 
         return settings_panel # show the settings interface
 
+    #TODO P1 remove type="main"
     def create_chess_board(self, squares, type="main"):
+        """
         if type == "main":
             board_widget = GridLayout(cols=8, rows=8, spacing=1, padding=(10,10))
         else:
             board_widget = GridLayout(cols=8, rows=12, spacing=1, size_hint=(1, 1))
+        """
+        board_widget = GridLayout(cols=8, rows=12, spacing=1, size_hint=(1, 1))
 
         for i, name in enumerate(SQUARES):
             bt = ChessSquare(keep_ratio=True, size_hint_x=1, size_hint_y=1)
@@ -1185,7 +1190,7 @@ class Chess_app(App):
         Clock.schedule_interval(self.update_clocks, 1)
 
         #grandparent = GridLayout(size_hint=(1,1), cols=1, orientation = 'vertical')
-        parent = BoxLayout(spacing=10)
+        parent = BoxLayout(spacing=10, orientation='vertical')
         # box = BoxLayout(spacing=10, padding=(10,10))
         self.board_widget = ChessBoardWidget(self)
             # self.create_chess_board(self.squares)
