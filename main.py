@@ -393,6 +393,7 @@ class ChessBoardWidget(Widget):
 #TODO http://kivy.org/docs/guide/inputs.html
 
     def on_touch_down(self, touch):
+        print "in on touch down: %s" % str(datetime.datetime.now())
         # push the current coordinate, to be able to restore it later
         touch.push()
 
@@ -402,20 +403,16 @@ class ChessBoardWidget(Widget):
         # dispatch the touch as usual to children
         # the coordinate in the touch is now in local space
         ret = super(ChessBoardWidget, self).on_touch_down(touch)
-
         if not self.collide_point(*touch.pos):
             touch.pop()
             return ret
 
         square = self._to_square(touch)
         if self.position[square] == '.' or (self._moving_piece.isupper() if self.position[square].islower() else self._moving_piece.islower()):
-            self._animate_from_origin = True
             return
-        else:
-            self._animate_from_origin = False
-
 
         tomove = self.fen.split()[1]
+
         if square == -1:
             self._moving_piece = '.'
             return
@@ -447,13 +444,24 @@ class ChessBoardWidget(Widget):
         return ret
 
     def on_touch_move(self, touch):
+        # TODO P3 make dragging an option for mobile
+        # Right now disabling because it's too slow
+        if not self.app.is_desktop():
+            return
+
+        coords = self._to_coordinates(self._to_square(touch))
+
         if self._moving_piece == '.':
             return
         self._draw_board()
         self._draw_pieces(skip=self._moving_piece_from)
         # self._highlight_square(self._moving_piece_to)
 
-        self._draw_piece(self._moving_piece, (touch.x - self.square_size / 2, touch.y - self.square_size / 2))
+        if (self.app.is_desktop()):
+            self._draw_piece(self._moving_piece, (touch.x - self.square_size / 2, touch.y - self.square_size / 2))
+        else:
+            self._draw_piece(self._moving_piece, (coords[0], coords[1]))
+
         self._highlight_square(self._moving_piece_from)
         # print touch
 
@@ -468,10 +476,14 @@ class ChessBoardWidget(Widget):
         return 'abcdefgh'.index(name[0]) + (8-int(name[1]))*8
 
     def on_touch_up(self, touch):
+        print "in on touch up: %s" % str(datetime.datetime.now())
         square = self._to_square(touch)
         if square == -1 or not self.collide_point(*touch.pos):
             return
+
+        coords = self._to_coordinates(square)
         move = self.square_name(self._moving_piece_from) + self.square_name(square)
+
         # print "move : {0}".format(move)
         if self._moving_piece == '.':
             if move[:2] == 'h9':
@@ -507,7 +519,8 @@ class ChessBoardWidget(Widget):
 
         # print "legal check"
         self._moving_piece_pos[0], self._moving_piece_pos[1] = self._to_coordinates(
-            self._moving_piece_from) if self._animate_from_origin else (touch.x - self.square_size / 2, touch.y - self.square_size / 2)
+            self._moving_piece_from) if self._animate_from_origin else coords
+
         animation = Animation(_moving_piece_pos=self._to_coordinates(square), duration=0.1, t='in_out_sine')
         animation.move = move
         animation.bind(on_complete=self._update_after_animation)

@@ -274,7 +274,7 @@ class Board(object):
         self.captured = self.get_square(move.destination)
         detail = ''
 
-        if piece.legal_move(move.destination) is not True:
+        if piece is None or piece.legal_move(move.destination) is not True:
             return False
 
         """
