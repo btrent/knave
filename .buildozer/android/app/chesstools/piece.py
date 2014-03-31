@@ -54,6 +54,17 @@ class Piece(object):
         return [move_from_array(self.pos, move) for move in self._all_moves() if self.board.safe_king(self.pos, move)]
 
     def legal_move(self, dest):
+        """
+        print "legal move criteria:"
+        print "1"
+        print self._good_target(dest)
+        print "2"
+        print self._can_move_to(dest)
+        print "3"
+        print self._clear_path(self._next_in_path(list(dest)))
+        print "4"
+        print self.board.safe_king(self.pos, dest)
+        """
         return self._good_target(dest) and self._can_move_to(dest) and self._clear_path(self._next_in_path(list(dest))) and self.board.safe_king(self.pos, dest)
 
     def can_move(self):
@@ -180,6 +191,7 @@ class Knight(Piece):
     def can_capture(self, dest, layout=None):
         r = abs(self.row() - dest[0])
         c = abs(self.column() - dest[1])
+
         if r and c and r + c == 3:
             return True
         return False

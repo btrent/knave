@@ -273,14 +273,25 @@ class Board(object):
         piece = self.get_square(move.source)
         self.captured = self.get_square(move.destination)
         detail = ''
+
+        if piece.legal_move(move.destination) is not True:
+            return False
+
+        """
         if piece.name not in ['King','Pawn']:
+            print "not a king or pawn"
+            print "pieces"
+            print self.pieces(self.turn)
+            What is this?
             possibilities = [p for p in self.pieces(self.turn) if p is not piece and p.name == piece.name and p.legal_move(move.destination)]
             if possibilities:
+                print "we have possibilities"
                 dc, dr = '', ''
                 for p in possibilities:
                     if p.row() == piece.row(): dc = move.start[0]
                     elif p.column() == piece.column(): dr = move.start[1]
                 detail = '%s%s'%(dc,dr) or move.start[0]
+            """
         move.set_pgn(piece, self.captured, detail)
         self.make_move(move.source, move.destination, promotion=move.promotion)
         self.turn = COLORS[self.turn]
@@ -290,3 +301,5 @@ class Board(object):
         self.all_positions[self.this_position] += 1
         if self.turn == 'white':
             self.fullmove += 1
+
+        return True
