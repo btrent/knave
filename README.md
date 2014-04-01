@@ -5,6 +5,7 @@ Work in progress chess app for Mac, Linux, and Android.
 
 This is based on the hard work and open source projects of:
 * Shivkumar Shivaji - https://github.com/sshivaji/kivy-chess
+* The PyChess Team - https://code.google.com/p/pychess/
 * Mario Balibrera - https://pypi.python.org/pypi/chesstools/0.1.8
 * Niklas Fiekas - https://github.com/niklasf/python-chess
 

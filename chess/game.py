@@ -1,53 +1,59 @@
-# -*- coding: utf-8 -*-
-#
-# This file is part of the python-chess library.
-# Copyright (C) 2012 Niklas Fiekas <niklas.fiekas@tu-clausthal.de>
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import chess
-import re
+class GameState:
+    Inactive = 0
+    Active = 1
+    Observe = 2
+    Examine = 3
+    Setup = 4
 
-class Game(chess.GameNode):
-    """The root node of a game."""
-    def __init__(self, start_comment="", headers=None):
-        chess.GameNode.__init__(self, None, None, (), start_comment)
-        chess.GameNode.positions={}
+class Varient:
+    Classical = 0
+    Bughouse = 1
+    Crazyhouse = 2
+    Atomic = 3
+    Suicide = 4
+    Losers = 5
+    Chess960 = 6
 
-        if headers is None:
-            self.__headers = chess.GameHeaderBag(self)
-        else:
-            if not headers.game == self:
-                raise ValueError("Header bag assigned to a different game.")
-            self.__headers = headers
-            # print headers.__headers
+class Game:
+    WHITE = 0
+    BLACK = 1
 
-    def set_headers(self, headers):
-        self.__headers = headers
+    state = GameState.Inactive
+    is_droppable = 0 # is this a droppable game, like bughouse?
+    is_960 = 0
+    clock_tick = -1 # -1 = none, 0 = black, 1 = white
+    white_castle = [True, True] # short and long
+    black_castle = [True, True]
+    board = None
+    board_widget = None
+    color_to_move = WHITE
+    ep_square = None
+    fifty_count = 0 # half moves since last irreversible move, for 50 move draws
+    repeat_count = 0 # for 3 move repetition
+    last_move = None
+    move_list = []
+    result = None
+    varient = Varient.Classical
+    zobrist = None # hopeful thinking for one day implementing
+    is_check = False # true if a king is in check
 
-    @property
-    def headers(self):
-        """A `chess.GameHeaderBag` holding the headers of the game."""
-        return self.__headers
+    def __init__(self, *args, **keywords):
+        pass
 
-    @property
-    def position(self):
-		return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-		"""
-        #A copy of the initial position of the game.
-        if "FEN" in self.headers:
-            return chess.Position(self.headers["FEN"])
-        else:
-            return chess.Position()
-		"""
+    def make_fics_move(style12):
+        print style12
+
+    def move(move):
+        pass
+
+    def all_legal_moves():
+        return board.all_legal_moves()
+
+class ClassicalGame(Game):
+    def __init__(self, widget, **keywords):
+        board_widget = widget
+        board = widget.board
+
+        print board.all_legal_moves()
+

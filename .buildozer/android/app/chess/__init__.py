@@ -26,21 +26,7 @@ __status__ = "Development"
 
 import inspect
 
-# Import from libchess.
-#from libchess import START_FEN
-#from libchess import opposite_color
-#from libchess import Square
-#from libchess import Piece
-#from libchess import Move
-#from libchess import Position
-#from libchess import PolyglotOpeningBookEntry
-#from libchess import PgnIndex
-#from libchess import GameHeaderBag
-from chess.game_header_bag import GameHeaderBag
-# Design phase.
 from chess.polyglot_opening_book import PolyglotOpeningBook
-from chess.game_node import GameNode
-from chess.game import Game
 from chess.pgn_file import PgnFile
 
 __all__ = [ name for name, obj in locals().items() if not inspect.ismodule(obj) ]
