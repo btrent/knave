@@ -37,9 +37,10 @@ class Connection (PooledThread):
     
 
     
-    def __init__ (self, host, ports, username, password):
+    def __init__ (self, host, ports, username, password, app=None):
 
-        
+
+        self.app = app
         self.host = host
         self.ports = ports
         self.username = username
@@ -112,8 +113,8 @@ BADPAS = _("The entered password was invalid.\n" + \
 
 class FICSConnection (Connection):
 
-    def __init__ (self, host, ports, username="guest", password="", conn=None):
-        Connection.__init__(self, host, ports, username, password)
+    def __init__ (self, host, ports, username="guest", password="", conn=None, app=None):
+        Connection.__init__(self, host, ports, username, password, app)
         self.conn = conn
         self.registred = None
         

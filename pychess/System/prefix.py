@@ -4,6 +4,7 @@ system or user space
 """
 
 import os
+import kivy
 import sys
 from os import makedirs
 from os.path import isdir, join, dirname, abspath
@@ -13,7 +14,11 @@ from os.path import isdir, join, dirname, abspath
 ################################################################################
 
 # Test if we are installed on the system, or are being run from tar/svn
-if sys.prefix in __file__:
+if kivy.utils.platform().startswith('and'):
+    _prefix = '/mnt/sdcard/knave'
+    _installed = False
+elif sys.prefix in __file__:
+
     for sub in ("share", "games", "share/games",
                 "local/share", "local/games", "local/share/games"):
         _prefix = join (sys.prefix, sub, "pychess")
@@ -44,16 +49,30 @@ try:
     from glib import get_user_data_dir, get_user_config_dir, get_user_cache_dir
 except ImportError:
     def __get_user_dir (xdg_env_var, fallback_dir_path):
+        if kivy.utils.platform().startswith('and'):
+            print "android"
+            
+            return '/mnt/sdcard/knave'
+
         try:
             directory = os.environ[xdg_env_var]
         except KeyError:
             directory = join(os.environ["HOME"], fallback_dir_path)
         return directory
     def get_user_data_dir ():
+        if kivy.utils.platform().startswith('and'):
+            return '/mnt/sdcard/knave/data'
+
         return __get_user_dir("XDG_DATA_HOME", ".local/share")
     def get_user_config_dir ():
+        if kivy.utils.platform().startswith('and'):
+            return '/mnt/sdcard/knave/.config'
+
         return __get_user_dir("XDG_CONFIG_HOME", ".config")
     def get_user_cache_dir ():
+        if kivy.utils.platform().startswith('and'):
+            return '/mnt/sdcard/knave/.cache'
+
         return __get_user_dir("XDG_CACHE_HOME", ".cache")
 
 pychess = "pychess"

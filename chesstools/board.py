@@ -3,12 +3,15 @@
 import random
 from chesstools import COLORS
 from chesstools.piece import Pawn, Knight, Bishop, Rook, Queen, King
-from chesstools.move import to_algebraic
+from chesstools.move import to_algebraic, Move
 
 LINEUP = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
 PROMOS = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen}
 
 class Board(object):
+
+    app = None
+
     def __init__(self, old_board=None, variant="standard", lineup=None):
         if old_board:
             for key, val in old_board.items():
@@ -268,7 +271,23 @@ class Board(object):
         else:
             return "checkmate"
 
-    def move(self, move):
+    def update(self, gameno, ply, curcol, lastmove, lastmove_lan, fen, wname, bname, wms, bms):
+        if lastmove is not None:
+            # print "last move: " + lastmove
+            # print "last move_lan: %s to %s" % lastmove_lan
+            if lastmove[0] != 'O':
+                self.move(Move(lastmove_lan[0], lastmove_lan[1]), True)
+            # castling
+            else:
+                rank = 1 if ply%2==1 else 8
+                if len(lastmove) == 3:
+                    self.move(Move('e%s'%rank,'g%s'%rank), True)
+                elif len(lastmove) == 5:
+                    self.move(Move('e%s'%rank,'c%s'%rank), True)
+        else:
+            self.reset()
+
+    def move(self, move, refresh=False):
         self.changes = []
         piece = self.get_square(move.source)
         self.captured = self.get_square(move.destination)
@@ -301,5 +320,9 @@ class Board(object):
         self.all_positions[self.this_position] += 1
         if self.turn == 'white':
             self.fullmove += 1
+
+        if refresh is True:
+            lan = move.long_algebraic()
+            self.app.board_widget.make_move(lan[0:2]+lan[3:], True)
 
         return True

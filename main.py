@@ -358,6 +358,8 @@ class ChessBoardWidget(Widget):
         super(ChessBoardWidget, self).__init__(**kwargs)
         self.app = app
         self.board = Board()
+        self.app.board = self.board
+        self.board.app = self.app # textbook OO
         self.last_move_san = None
         self.light = (1, 0.808, 0.620)
         # self.light =  (Image(LIGHT_SQUARE+"fir-lite.jpg"))
@@ -482,8 +484,25 @@ class ChessBoardWidget(Widget):
         if square == -1 or not self.collide_point(*touch.pos):
             return
 
-        coords = self._to_coordinates(square)
         move = self.square_name(self._moving_piece_from) + self.square_name(square)
+        
+        self.make_move(move)
+
+        touch.ungrab(self)
+
+        return True
+
+    def make_move(self, move, is_auto=False):
+
+        print "move is %s " % move
+
+        from_square = self.square_number(move[:2])
+        square = self.square_number(move[2:])
+        coords = self._to_coordinates(square)
+
+        if is_auto is True:
+            self._moving_piece = self.position[from_square]
+            self.position = self.position[:from_square]+"."+self.position[from_square+1:]
 
         # print "move : {0}".format(move)
         if self._moving_piece == '.':
@@ -502,12 +521,14 @@ class ChessBoardWidget(Widget):
                 move = move[-2:] + move[:2]
         # print "move_after_some-processing: {0}".format(move)
         if self.square_name(self._moving_piece_from) == self.square_name(square):
+            self.on_size() # kind of a hack to trigger a refresh so the piece snaps to square
             if not self.app.use_engine:
                 if self.app.hint_move and self.square_name(square) in self.app.hint_move:
                     move = self.app.hint_move
             else:
                 if self.app.engine_highlight_move and self.square_name(square) in self.app.engine_highlight_move:
                     move = self.app.engine_highlight_move
+
         # print "move after hint : {0}".format(move)
         if move:
             if move[:2] != self.square_name(square) and move[-2:] != self.square_name(square):
@@ -530,7 +551,6 @@ class ChessBoardWidget(Widget):
         self.app.hint_move = None
         # print('MOVE : ' + move)
 
-        touch.ungrab(self)
         return True
 
 class Touch(object):
@@ -869,10 +889,12 @@ class Knave(App):
             return '*'
 
     def on_load(self, i):
-        if not self.is_desktop:
-            return
-        if (len(sys.argv) > 1):
-            if sys.argv[1] == "test":
+#        if not self.is_desktop:
+#            return
+#        if (len(sys.argv) < 1):
+#            if sys.argv[1] == "test":
+         if True:
+             if True:
                 # hack because there doesn't appear to be a real on_load in kivy
                 if (i != 2):
                     import threading

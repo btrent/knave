@@ -38,7 +38,7 @@ def get_player_tooltip_text (player, show_status=True):
         text += "\n%s" % player.display_status
     return text
 
-class FICSPlayer ():
+class FICSPlayer (object):
     def __init__ (self, name, online=False, status=IC_STATUS_UNKNOWN,
                   game=None, titles=None, ratings=None):
         assert type(name) is str, name
@@ -262,7 +262,7 @@ class FICSPlayer ():
         else:
             return None
         
-    def setRating (self, rating_type):
+    def setRating (self, rating_type, ratingobj):
         self.ratings[rating_type] = ratingobj
         
     def addRating (self, rating_type, rating):
@@ -363,8 +363,9 @@ class FICSPlayers ():
         if hash(value) in self.players:
             raise Exception("%s already exists in %s" % (repr(value), repr(self)))
         self.players[hash(value)] = value
-        self.players_cids[hash(value)] = value.connect("notify::online",
-                                                       self.online_changed)
+        # self.players_cids[hash(value)] = value.connect("notify::online",
+        #                                                self.online_changed)
+        self.players_cids[hash(value)] = value.long_name
     
     def __delitem__ (self, player):
         if type(player) is not FICSPlayer: raise TypeError

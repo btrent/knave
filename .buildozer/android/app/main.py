@@ -47,12 +47,12 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.animation import Animation
 from kivy.properties import ListProperty
 
+from chess.game import Game, ClassicalGame
 from chesstools import Board, Move
 from sets import Set
 import itertools as it
 from operator import attrgetter
 from time import sleep
-from chess import polyglot_opening_book
 
 """
 from chess.game import Game
@@ -358,6 +358,8 @@ class ChessBoardWidget(Widget):
         super(ChessBoardWidget, self).__init__(**kwargs)
         self.app = app
         self.board = Board()
+        self.app.board = self.board
+        self.board.app = self.app # textbook OO
         self.last_move_san = None
         self.light = (1, 0.808, 0.620)
         # self.light =  (Image(LIGHT_SQUARE+"fir-lite.jpg"))
@@ -482,8 +484,25 @@ class ChessBoardWidget(Widget):
         if square == -1 or not self.collide_point(*touch.pos):
             return
 
-        coords = self._to_coordinates(square)
         move = self.square_name(self._moving_piece_from) + self.square_name(square)
+        
+        self.make_move(move)
+
+        touch.ungrab(self)
+
+        return True
+
+    def make_move(self, move, is_auto=False):
+
+        print "move is %s " % move
+
+        from_square = self.square_number(move[:2])
+        square = self.square_number(move[2:])
+        coords = self._to_coordinates(square)
+
+        if is_auto is True:
+            self._moving_piece = self.position[from_square]
+            self.position = self.position[:from_square]+"."+self.position[from_square+1:]
 
         # print "move : {0}".format(move)
         if self._moving_piece == '.':
@@ -502,12 +521,14 @@ class ChessBoardWidget(Widget):
                 move = move[-2:] + move[:2]
         # print "move_after_some-processing: {0}".format(move)
         if self.square_name(self._moving_piece_from) == self.square_name(square):
+            self.on_size() # kind of a hack to trigger a refresh so the piece snaps to square
             if not self.app.use_engine:
                 if self.app.hint_move and self.square_name(square) in self.app.hint_move:
                     move = self.app.hint_move
             else:
                 if self.app.engine_highlight_move and self.square_name(square) in self.app.engine_highlight_move:
                     move = self.app.engine_highlight_move
+
         # print "move after hint : {0}".format(move)
         if move:
             if move[:2] != self.square_name(square) and move[-2:] != self.square_name(square):
@@ -530,7 +551,6 @@ class ChessBoardWidget(Widget):
         self.app.hint_move = None
         # print('MOVE : ' + move)
 
-        touch.ungrab(self)
         return True
 
 class Touch(object):
@@ -669,7 +689,6 @@ class ChessSquare(Button):
 
 
     def on_pos(self, instance, pos):
-        print "setting pos: %s" % str(datetime.datetime.now())
         # print '%s Positions: %s' % (get_square_abbr(self.coord), pos)
         if self.piece:
             self.piece.set_pos(pos)
@@ -679,7 +698,7 @@ class DataItem(object):
         self.text = text
         self.is_selected = is_selected
 
-class Chess_app(App):
+class Knave(App):
     def generate_settings(self):
         def go_to_setup_board(value):
             self.root.current = 'setup_board'
@@ -869,6 +888,21 @@ class Chess_app(App):
         except IndexError:
             return '*'
 
+    def on_load(self, i):
+#        if not self.is_desktop:
+#            return
+#        if (len(sys.argv) < 1):
+#            if sys.argv[1] == "test":
+         if True:
+             if True:
+                # hack because there doesn't appear to be a real on_load in kivy
+                if (i != 2):
+                    import threading
+                    threading.Timer(2, self.on_load, [2]).start()
+                else:
+                    from test import Test
+                    Test(self).run_all()
+
     def build(self):
         if (not self.is_desktop()):
             Config.set('postproc', 'retain_time', '10')
@@ -877,6 +911,7 @@ class Chess_app(App):
             Config.set('graphics', 'fullscreen', 'auto')
             Config.write()
 
+        self.connection = None
         self.custom_fen = None
         self.pyfish_fen = 'startpos'
         self.variation_dropdown = None
@@ -939,6 +974,8 @@ class Chess_app(App):
         parent = GridLayout(size_hint=(1,1), cols=1, orientation = 'vertical')
         # box = BoxLayout(spacing=10, padding=(10,10))
         self.board_widget = ChessBoardWidget(self)
+        self.game = ClassicalGame(self.board_widget)
+
             # self.create_chess_board(self.squares)
 
         # Dummy params for listener
@@ -1018,6 +1055,8 @@ class Chess_app(App):
             else:
                 # print "white to move"
                 self.setup_chessboard.turn = 'w'
+
+        self.on_load(1)
 
         return sm
 
@@ -1467,4 +1506,4 @@ class Chess_app(App):
         return True
 
 if __name__ == '__main__':
-    Chess_app().run()
+    Knave().run()

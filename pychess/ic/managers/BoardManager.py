@@ -147,13 +147,12 @@ def parse_reason (result, reason, wname=None):
 class BoardManager ():
     
 
-    
     castleSigns = {}
     queuedStyle12s = {}
     
     def __init__ (self, connection):
 
-        
+       
         self.connection = connection
         
         self.connection.expect_line (self.onStyle12, "<12> (.+)")
@@ -219,6 +218,7 @@ class BoardManager ():
         gameno = int(fields[15])
         relation = relations[fields[18]]
         ply = int(fields[25])*2 - (curcol == WHITE and 2 or 1)
+        lastmove_lan = fields[26] != "none" and (fields[26][2:4], fields[26][5:7]) or None
         lastmove = fields[28] != "none" and fields[28] or None
         wname = fields[16]
         bname = fields[17]
@@ -279,7 +279,7 @@ class BoardManager ():
         # Standard chess numbering
         fen += fields[25]
         
-        return gameno, relation, curcol, ply, wname, bname, wms, bms, gain, lastmove, fen
+        return gameno, relation, curcol, ply, wname, bname, wms, bms, gain, lastmove, lastmove_lan, fen
 
     def __createGame(self, gameno, wname, bname, wms, bms, fen):
         wplayer = self.connection.players.get(FICSPlayer(wname))
@@ -303,7 +303,7 @@ class BoardManager ():
             castleSigns = self.castleSigns[gameno]
         else:
             castleSigns = ("k","q")
-        gameno, relation, curcol, ply, wname, bname, wms, bms, gain, lastmove, fen = \
+        gameno, relation, curcol, ply, wname, bname, wms, bms, gain, lastmove, lastmove_lan, fen = \
                 self.parseStyle12(style12, castleSigns)
         
         if gameno not in self.gamemodelStartedEvents:
@@ -317,8 +317,12 @@ class BoardManager ():
                     if game.supported:
                         self.observe(game)
 
-        self.emit("boardUpdate", gameno, ply, curcol, lastmove, fen, wname, bname, wms, bms)
+        # self.emit("boardUpdate", gameno, ply, curcol, lastmove, fen, wname, bname, wms, bms)
+        self.boardUpdate(gameno, ply, curcol, lastmove, lastmove_lan, fen, wname, bname, wms, bms)
     
+    def boardUpdate(self, gameno, ply, curcol, lastmove, lastmove_lan, fen, wname, bname, wms, bms):
+        self.connection.app.board.update(gameno, ply, curcol, lastmove, lastmove_lan, fen, wname, bname, wms, bms)
+
     def onGameModelStarted (self, gameno):
         self.gamemodelStartedEvents[gameno].set()
     
@@ -368,7 +372,7 @@ class BoardManager ():
         
         castleSigns = self.generateCastleSigns(style12, game_type)
         self.castleSigns[gameno] = castleSigns
-        gameno, relation, curcol, ply, wname, bname, wms, bms, gain, lastmove, fen = \
+        gameno, relation, curcol, ply, wname, bname, wms, bms, gain, lastmove, lastmove_lan, fen = \
                 self.parseStyle12(style12, castleSigns)
 
         wplayer = self.connection.players.get(FICSPlayer(wname))
@@ -523,7 +527,7 @@ class BoardManager ():
             style12 = matchlist[index][5:]
             castleSigns = self.generateCastleSigns(style12, game_type)
             gameno, relation, curcol, ply, wname, bname, wms, bms, gain, lastmove, \
-                fen = self.parseStyle12(style12, castleSigns)
+                lastmove_lan, fen = self.parseStyle12(style12, castleSigns)
             initialfen = fen
             movesstart = index + 4
         else:
@@ -567,8 +571,8 @@ class BoardManager ():
         if in_progress:
             # Apply queued board updates
             for style12 in self.queuedStyle12s[gameno]:
-                gameno, relation, curcol, ply, wname, bname, wms, bms, gain, lastmove, fen = \
-                        self.parseStyle12(style12, castleSigns)
+                gameno, relation, curcol, ply, wname, bname, wms, bms, gain, lastmove, \
+                        lastmove_lan, fen = self.parseStyle12(style12, castleSigns)
                 if lastmove == None: continue
                 moves[ply-1] = lastmove
                 # Updated the queuedMoves in case there has been a takeback
