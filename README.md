@@ -23,3 +23,4 @@ To build/install for Android:
    4. Make sure the JAVA_HOME environment variable is set correctly
    5. Execute "buildozer android debug deploy run"
    6. If deployed to a connected device, execute "adb logcat"
+
