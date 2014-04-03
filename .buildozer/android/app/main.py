@@ -335,6 +335,14 @@ class ChessBoardWidget(Widget):
         self._draw_pieces()
 
     def _animate_piece(self, touch, pos):
+        return
+        """
+        if kivy.utils.platform().startswith('and'):
+            # bug in kivy for android: screen flashes if we don't do this
+            # but if we do it on other platforms, animation doesn't work
+            self._moving_piece.moving = False
+        """
+
         self._draw_board()
         self._draw_pieces(skip=self._moving_piece_from)
         self._draw_piece(self._moving_piece, pos)
@@ -493,7 +501,6 @@ class ChessBoardWidget(Widget):
         return True
 
     def make_move(self, move, is_auto=False):
-
         print "move is %s " % move
 
         from_square = self.square_number(move[:2])
@@ -542,6 +549,7 @@ class ChessBoardWidget(Widget):
         # print "legal check"
         self._moving_piece_pos[0], self._moving_piece_pos[1] = self._to_coordinates(
             self._moving_piece_from) if self._animate_from_origin else coords
+
 
         print "animating: %s" % str(datetime.datetime.now())
         animation = Animation(_moving_piece_pos=self._to_coordinates(square), duration=0.1, t='in_out_sine')

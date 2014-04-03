@@ -38,6 +38,8 @@ class Test:
             "<12> rnbqkbnr pppppppp -------- -------- ----P--- -------- PPPP-PPP RNBQKBNR W -1 1 1 1 1 0 408 theblob fortu 0 1 0 39 39 60 60 1 none (0:00) none 0 0 0",
             "<12> rnbqkbnr pppppppp -------- -------- ----P--- -------- PPPP-PPP RNBQKBNR B 3 1 1 1 1 0 408 theblob fortu 0 1 0 39 39 60 60 1 P/e2-e4 (0:00) e4 0 0 0",
             "<12> rnbqkbnr pppp-ppp -------- ----p--- ----P--- -------- PPPP-PPP RNBQKBNR W 3 1 1 1 1 0 408 theblob fortu 0 1 0 39 39 60 60 2 P/e7-e5 (0:00) e5 0 1 0",
+        #    ]
+        #self.aaa = [
             "<12> rnbqkbnr pppp-ppp -------- ----p--- ----P--- -----N-- PPPP-PPP RNBQKB-R B 2 1 1 1 1 0 408 theblob fortu 0 1 0 39 39 59 60 2 N/g1-f3 (0:01) Nf3 0 1 212",
             "<12> rnbqkb-r pppp-ppp -----n-- ----p--- ----P--- -----N-- PPPP-PPP RNBQKB-R W -1 1 1 1 1 0 408 theblob fortu 0 1 0 39 39 59 60 3 N/g8-f6 (0:00) Nf6 0 1 157",
             "<12> rnbqkb-r pppp-ppp -----n-- ----p--- --B-P--- -----N-- PPPP-PPP RNBQK--R B -1 1 1 1 1 1 408 theblob fortu 0 1 0 39 39 59 60 3 B/f1-c4 (0:01) Bc4 0 1 212",

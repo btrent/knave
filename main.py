@@ -335,9 +335,13 @@ class ChessBoardWidget(Widget):
         self._draw_pieces()
 
     def _animate_piece(self, touch, pos):
+        # this is handled elsewhere, right?
+        return
+        """
         self._draw_board()
         self._draw_pieces(skip=self._moving_piece_from)
         self._draw_piece(self._moving_piece, pos)
+        """
 
     def mouse_callback(self, instance, value):
         touch = Touch(value[0],value[1])
@@ -493,7 +497,6 @@ class ChessBoardWidget(Widget):
         return True
 
     def make_move(self, move, is_auto=False):
-
         print "move is %s " % move
 
         from_square = self.square_number(move[:2])
@@ -542,6 +545,7 @@ class ChessBoardWidget(Widget):
         # print "legal check"
         self._moving_piece_pos[0], self._moving_piece_pos[1] = self._to_coordinates(
             self._moving_piece_from) if self._animate_from_origin else coords
+
 
         print "animating: %s" % str(datetime.datetime.now())
         animation = Animation(_moving_piece_pos=self._to_coordinates(square), duration=0.1, t='in_out_sine')
@@ -889,12 +893,12 @@ class Knave(App):
             return '*'
 
     def on_load(self, i):
-#        if not self.is_desktop:
-#            return
-#        if (len(sys.argv) < 1):
-#            if sys.argv[1] == "test":
-         if True:
-             if True:
+        if not self.is_desktop:
+            return
+        if (len(sys.argv) < 1):
+            if sys.argv[1] == "test":
+#         if True:
+#             if True:
                 # hack because there doesn't appear to be a real on_load in kivy
                 if (i != 2):
                     import threading
