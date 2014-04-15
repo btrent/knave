@@ -71,7 +71,7 @@ class SetupBoard (gtk.EventBox):
     def button_release (self, widget, event):
         cord = self.point2Cord (event.x, event.y)
         if cord == self.view.active:
-            self.emit('cord_clicked', cord)
+            #self.emit('cord_clicked', cord)
         self.view.active = None
         
     def motion_notify (self, widget, event):

@@ -2,30 +2,55 @@ import os
 import sys
 import time
 
+import kivy.utils
+
 from pychess.Utils.const import LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR, STANDARD_LOGGING
 
 class Log ():
-        
-    def _format (self, task, message, type):
+      
+    DEBUG = True
+    labels = {
+        LOG_DEBUG: 'DEBUG',
+        LOG_INFO: 'INFO',
+        LOG_WARNING: 'WARNING',
+        LOG_ERROR: 'ERROR',
+    }
+  
+    @staticmethod
+    def _format (task, message, type):
         t = time.strftime ("%H:%M:%S")
-        return "%s %s %s: %s" % (t, task, labels[type], message)
+        return "%s %s %s: %s" % (t, task, Log.labels[type], message)
         
-    def _log (self, task, message, type):
-        if not message: return
+    @staticmethod
+    def _log (task, message, type):
+        try:
+            print message
+        except:
+            pass
+        if not message: 
+            return
+
+        if kivy.utils.platform().startswith('and'):
+            return
             
-        print message
+        # temporarily disabling
+        print Log._format(task, message, LOG_DEBUG)
+
+    @staticmethod
+    def debug (message, task="Default"):
+        if Log.DEBUG:
+            Log._log (task, message, LOG_DEBUG)
         
-    def debug (self, message, task="Default"):
-        if DEBUG:
-            self._log (task, message, LOG_DEBUG)
+    @staticmethod
+    def info (message, task="Default"):
+        Log._log (task, message, LOG_INFO)
         
-    def info (self, message, task="Default"):
-        self._log (task, message, LOG_INFO)
+    @staticmethod
+    def warn (message, task="Default"):
+        Log._log (task, message, LOG_WARNING)
         
-    def warn (self, message, task="Default"):
-        self._log (task, message, LOG_WARNING)
-        
-    def error (self, message, task="Default"):
-        self._log (task, message, LOG_ERROR)
+    @staticmethod
+    def error (message, task="Default"):
+        Log._log (task, message, LOG_ERROR)
 
 

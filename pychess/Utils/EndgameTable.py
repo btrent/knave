@@ -62,6 +62,6 @@ class EndgameTable(GObject):
                     ret = []
                     for lMove, result, depth in results:
                         ret.append( (Move(lMove), result, depth) )
-                    self.emit("scored", (lBoard, ret))
+                    #self.emit("scored", (lBoard, ret))
                     return ret
         return []

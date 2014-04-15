@@ -86,10 +86,10 @@ class Human (Player):
         self.gamemodel = self.board.view.model
         self.queue = Queue()
         self.color = color
-        self.conid = [
-            self.board.connect("piece_moved", self.piece_moved),
-            self.board.connect("action", lambda b,action,param: self.emit_action(action, param))
-        ]
+        #self.conid = [
+        #    self.board.connect("piece_moved", self.piece_moved),
+        #    self.board.connect("action", lambda b,action,param: self.emit_action(action, param))
+        #]
         self.setName(name)
         self.ichandle = ichandle
         self.icrating = icrating
@@ -106,7 +106,7 @@ class Human (Player):
                 self.gamemodel.status == RUNNING and \
                 timemodel.getPlayerTime(1-self.color) <= 0:
             log.info('Automatically sending flag call on behalf of player %s.' % self.name)
-            self.emit("offer", Offer(FLAG_CALL))
+            #self.emit("offer", Offer(FLAG_CALL))
     
     def piece_moved (self, board, move, color):
         if color != self.color:
@@ -128,7 +128,7 @@ class Human (Player):
             else:
                 if self.gamemodel.boards[-1].color != self.color:
                     return
-        self.emit("offer", Offer(action, param=param))
+        #self.emit("offer", Offer(action, param=param))
     
     #===========================================================================
     #    Send the player move updates
@@ -211,10 +211,10 @@ class Human (Player):
             self.gmwidg.setLocked(False)
     
     def putMessage (self, text):
-        self.emit("messageRecieved", text)
+        #self.emit("messageRecieved", text)
     
     def sendMessage (self, text):
-        self.emit("offer", Offer(CHAT_ACTION, param=text))
+        #self.emit("offer", Offer(CHAT_ACTION, param=text))
     
     #===========================================================================
     #    Offer handling
@@ -234,9 +234,9 @@ class Human (Player):
         
         def response_cb (infobar, response, message):
             if response == gtk.RESPONSE_ACCEPT:
-                self.emit("accept", offer)
+                #self.emit("accept", offer)
             elif response == gtk.RESPONSE_NO:
-                self.emit("decline", offer)
+                #self.emit("decline", offer)
             message.dismiss()
         content = InfoBar.get_message_content(heading, text, gtk.STOCK_DIALOG_QUESTION)
         message = InfoBarMessage(gtk.MESSAGE_QUESTION, content, response_cb)
@@ -253,7 +253,7 @@ class Human (Player):
         content = InfoBar.get_message_content(heading, text, gtk.STOCK_DIALOG_INFO)
         def response_cb (infobar, response, message):
             if response == gtk.RESPONSE_ACCEPT:
-                self.emit("offer", offer)
+                #self.emit("offer", offer)
             message.dismiss()
         message = InfoBarMessage(gtk.MESSAGE_INFO, content, response_cb)
         message.add_button(InfoBarMessageButton(_("Resend"), gtk.RESPONSE_ACCEPT))

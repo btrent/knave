@@ -117,7 +117,7 @@ class SubProcess (gobject.GObject):
             if type(code) == str:
                 log.error(code+"\n", self.defname)
             else: log.error(os.strerror(code)+"\n", self.defname)
-            self.emit("died")
+            #self.emit("died")
             self.gentleKill()
     
     def __io_cb (self, channel, condition, isstderr):

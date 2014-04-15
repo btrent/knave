@@ -15,7 +15,7 @@ except ImportError, e:
             'error': (SIGNAL_RUN_FIRST, TYPE_NONE, (object,))
         }
         def checkSound(self):
-            self.emit("error", None)
+            #self.emit("error", None)
         def play(self, uri):
             pass
 
@@ -35,12 +35,12 @@ else:
             if message.type == gst.MESSAGE_ERROR:
                 # Sound seams sometimes to work, even though errors are dropped.
                 # Therefore we really can't do anything to test.
-                # self.emit("error", message)
+                # #self.emit("error", message)
                 simpleMessage, advMessage = message.parse_error()
                 log.warn("Gstreamer error '%s': %s" % (simpleMessage, advMessage))
                 self.__del__()
             elif message.type == gst.MESSAGE_EOS:
-                self.emit("end")
+                #self.emit("end")
             return True
         
         def play(self, uri):

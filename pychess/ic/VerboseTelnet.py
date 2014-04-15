@@ -185,7 +185,8 @@ class PredictionsTelnet:
         self.parseNormalLine(line)
 
     def parseNormalLine(self, line, block_code=None):
-        Log.debug(line+"\n", (self.telnet.name, "lines"))
+        #print "LINE: " + line
+        #Log.debug(line+"\n", (self.telnet.name, "lines"))
         origLine = line
 
         if self.__state:
@@ -210,12 +211,14 @@ class PredictionsTelnet:
                     self.__state = prediction
                 if answer in (RETURN_MATCH, RETURN_NEED_MORE):
                     if self.consolehandler is not None:
+                        #print "handling it"
                         self.consolehandler.handle(line, block_code)
                     break
             else:
                 if self.consolehandler is not None:
+                    #print "DOWN HERE"
                     self.consolehandler.handle(line)
-                Log.debug(origLine+"\n", (self.telnet.name, "nonmatched"))
+                #Log.debug(origLine+"\n", (self.telnet.name, "nonmatched"))
     
     def run_command(self, text):
         if self.__block_mode:

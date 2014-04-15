@@ -42,7 +42,7 @@ fullscreen = 0
 #
 
 # (list) Permissions
-android.permissions = VIBRATE
+android.permissions = VIBRATE,INTERNET
 
 # (int) Android API to use
 #android.api = 21

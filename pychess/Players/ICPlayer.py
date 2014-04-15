@@ -46,25 +46,25 @@ class ICPlayer (Player):
             log.debug("ICPlayer.__onOfferAdd: emitting offer: self.gameno=%s self.name=%s %s\n" % \
                 (self.gameno, self.name, offer))
             self.offers[offer.index] = offer
-            self.emit ("offer", offer)
+            #self.emit ("offer", offer)
     
     def __onOfferDeclined (self, om, offer):
         for offer_ in self.gamemodel.offers.keys():
             if offer.type == offer_.type:
                 offer.param = offer_.param
         log.debug("ICPlayer.__onOfferDeclined: emitting decline for %s\n" % offer)
-        self.emit("decline", offer)
+        #self.emit("decline", offer)
     
     def __onOfferRemove (self, om, offer):
         if offer.index in self.offers:
             log.debug("ICPlayer.__onOfferRemove: emitting withdraw: self.gameno=%s self.name=%s %s\n" % \
                 (self.gameno, self.name, offer))
-            self.emit ("withdraw", self.offers[offer.index])
+            #self.emit ("withdraw", self.offers[offer.index])
             del self.offers[offer.index]
     
     def __onPrivateMessage (self, cm, name, title, isadmin, text):
         if name == self.ichandle:
-            self.emit("offer", Offer(CHAT_ACTION, param=text))
+            #self.emit("offer", Offer(CHAT_ACTION, param=text))
     
     def __boardUpdate (self, bm, gameno, ply, curcol, lastmove, fen, wname, bname, wms, bms):
         log.debug("ICPlayer.__boardUpdate: id(self)=%d self=%s %s %s %s %d %d %s %s %d %d\n" % \

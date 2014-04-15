@@ -54,7 +54,7 @@ class ToggleComboBox (gtk.ToggleButton):
         oldactive = self._active
         # take care the case when last used engine was uninstalled
         self._active = (active < len(self._items) and [active] or [1])[0]
-        self.emit("changed", oldactive)
+        #self.emit("changed", oldactive)
         text, icon = self._items[self._active]
         self.label.set_markup (self.markup[0] + text + self.markup[1])
         if icon != None:

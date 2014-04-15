@@ -67,10 +67,10 @@ class TimeModel (GObject):
         
         if self.getPlayerTime(WHITE) <= 0:
             #print 'emit for white'
-            self.emit('zero_reached', WHITE)
+            #self.emit('zero_reached', WHITE)
         if self.getPlayerTime(BLACK) <= 0:
             #print 'emit for black'
-            self.emit('zero_reached', BLACK)
+            #self.emit('zero_reached', BLACK)
         
         #print 'heap is now', self.heap
         
@@ -92,7 +92,7 @@ class TimeModel (GObject):
     
     def setMovingColor (self, movingColor):
         self.movingColor = movingColor
-        self.emit("player_changed")
+        #self.emit("player_changed")
     
     def tap (self):
         
@@ -114,16 +114,16 @@ class TimeModel (GObject):
         
         if self.started:
             self.counter = time()
-            self.emit("time_changed")
+            #self.emit("time_changed")
         
-        self.emit("player_changed")
+        #self.emit("player_changed")
     
     def start (self):
         if self.started: return
         self.started = True
         
         self.counter = time()
-        self.emit("time_changed")
+        #self.emit("time_changed")
     
     def end (self):
         self.pause()
@@ -138,8 +138,8 @@ class TimeModel (GObject):
             self.pauseInterval = time()-self.counter
         
         self.counter = None
-        self.emit("time_changed")
-        self.emit("pause_changed", True)
+        #self.emit("time_changed")
+        #self.emit("pause_changed", True)
     
     def resume (self):
         log.debug("TimeModel.resume: self=%s\n" % self)
@@ -148,7 +148,7 @@ class TimeModel (GObject):
         self.paused = False
         self.counter = time() - self.pauseInterval
         
-        self.emit("pause_changed", False)
+        #self.emit("pause_changed", False)
     
     ############################################################################
     # Undo and redo in TimeModel                                               #
@@ -178,8 +178,8 @@ class TimeModel (GObject):
             self.started = False
             self.counter = None
         
-        self.emit("time_changed")
-        self.emit("player_changed")
+        #self.emit("time_changed")
+        #self.emit("player_changed")
     
     ############################################################################
     # Updating                                                                 #
@@ -189,7 +189,7 @@ class TimeModel (GObject):
         if color == self.movingColor and self.started:
             self.counter = secs + time() - self.intervals[color][-1]
         else: self.intervals[color][-1] = secs
-        self.emit("time_changed")
+        #self.emit("time_changed")
     
     def syncClock (self, wsecs, bsecs):
         """ Syncronize clock to e.g. fics time """
@@ -203,7 +203,7 @@ class TimeModel (GObject):
                 self.counter = bsecs + time() - self.intervals[BLACK][-1]
             else: self.intervals[BLACK][-1] = bsecs
             self.intervals[WHITE][-1] = wsecs
-        self.emit("time_changed")
+        #self.emit("time_changed")
     
     ############################################################################
     # Info                                                                     #

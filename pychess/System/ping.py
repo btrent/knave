@@ -50,13 +50,13 @@ class Pinger (GObject):
             time = float(time)
             if unit == "s":
                 time *= 1000
-            self.emit("recieved", time)
+            #self.emit("recieved", time)
         else:
             for expr in self.errorExprs:
                 match = expr.search(line)
                 if match:
                     msg = match.groups()[0]
-                    self.emit("error", _(msg))
+                    #self.emit("error", _(msg))
     
     def __handleDead (self, subprocess):
         if self.deadCount < self.restartsOnDead:
@@ -67,7 +67,7 @@ class Pinger (GObject):
             self.start()
             self.deadCount += 1
         else:
-            self.emit("error", _("Died"))
+            #self.emit("error", _("Died"))
             self.stop()
     
     def stop (self):

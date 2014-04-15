@@ -48,7 +48,7 @@ class ChainVBox (gtk.VBox):
         else:
             self.image.set_from_file(addDataPrefix("glade/stock-vchain-broken-24.png"))
             self._active = False
-        self.emit("clicked")
+        #self.emit("clicked")
 
 CHAIN_TOP, CHAIN_BOTTOM = range(2)
 SHORT_LINE = 2

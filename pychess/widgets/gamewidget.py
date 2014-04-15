@@ -410,7 +410,7 @@ class GameWidget (gobject.GObject):
             self.player_name_labels[color].set_tooltip_text(get_player_tooltip_text
                 (self.gamemodel.ficsplayers[color], show_status=False))
         
-        self.emit('title_changed', self.display_text)
+        #self.emit('title_changed', self.display_text)
     
     def zero_reached (self, timemodel, color):
         if self.gamemodel.status not in UNFINISHED_STATES: return
@@ -438,7 +438,7 @@ class GameWidget (gobject.GObject):
         close_button.add(createImage(gtk_close))
         close_button.set_relief(gtk.RELIEF_NONE)
         close_button.set_size_request(20, 18)
-        close_button.connect("clicked", lambda w: self.emit("close_clicked"))
+        #close_button.connect("clicked", lambda w: self.emit("close_clicked"))
         hbox.pack_end(close_button, expand=False)
         text_hbox = gtk.HBox()
         white_label = gtk.Label("")

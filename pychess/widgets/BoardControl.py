@@ -108,7 +108,7 @@ class BoardControl (gtk.EventBox):
         
         if self.view.model.curplayer.__type__ == LOCAL and self.view.shownIsMainLine() and \
            board.board.next is None and self.view.model.status == RUNNING:
-            self.emit("piece_moved", move, color)
+            #self.emit("piece_moved", move, color)
         else:
             if board.board.next is None and not self.view.shownIsMainLine():
                 self.view.model.add_move2variation(board, move, self.view.shownVariationIdx)
@@ -120,28 +120,28 @@ class BoardControl (gtk.EventBox):
     def actionActivate (self, widget, key):
         """ Put actions from a menu or similar """
         if key == "call_flag":
-            self.emit("action", FLAG_CALL, None)
+            #self.emit("action", FLAG_CALL, None)
         elif key == "abort":
-            self.emit("action", ABORT_OFFER, None)
+            #self.emit("action", ABORT_OFFER, None)
         elif key == "adjourn":
-            self.emit("action", ADJOURN_OFFER, None)
+            #self.emit("action", ADJOURN_OFFER, None)
         elif key == "draw":
-            self.emit("action", DRAW_OFFER, None)
+            #self.emit("action", DRAW_OFFER, None)
         elif key == "resign":
-            self.emit("action", RESIGNATION, None)
+            #self.emit("action", RESIGNATION, None)
         elif key == "ask_to_move":
-            self.emit("action", HURRY_ACTION, None)
+            #self.emit("action", HURRY_ACTION, None)
         elif key == "undo1":
             curColor = self.view.model.variations[0][-1].color
             curPlayer = self.view.model.players[curColor]
             if curPlayer.__type__ == LOCAL and self.view.model.ply > 1:
-                self.emit("action", TAKEBACK_OFFER, self.view.model.ply-2)
+                #self.emit("action", TAKEBACK_OFFER, self.view.model.ply-2)
             else:
-                self.emit("action", TAKEBACK_OFFER, self.view.model.ply-1)
+                #self.emit("action", TAKEBACK_OFFER, self.view.model.ply-1)
         elif key == "pause1":
-            self.emit("action", PAUSE_OFFER, None)
+            #self.emit("action", PAUSE_OFFER, None)
         elif key == "resume1":
-            self.emit("action", RESUME_OFFER, None)
+            #self.emit("action", RESUME_OFFER, None)
     
     def shown_changed (self, view, shown):
         self.lockedPly = self.view.shown
@@ -259,7 +259,7 @@ class BoardControl (gtk.EventBox):
                 return
             if validate(board, move):
                 if self.view.shownIsMainLine() and board.board.next is None:
-                    self.emit("piece_moved", move, color)
+                    #self.emit("piece_moved", move, color)
                 else:
                     if board.board.next is None:
                         self.view.model.add_move2variation(board, move, self.view.shownVariationIdx)

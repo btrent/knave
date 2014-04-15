@@ -190,7 +190,7 @@ class CECPEngine (ProtocolEngine):
             print >> self.engine, "new"
 
             # we are now ready for options:
-            self.emit("readyForOptions")
+            #self.emit("readyForOptions")
         elif self.protover == 2:
             # start advanced protocol initialisation:
             print >> self.engine, "protover 2"
@@ -209,7 +209,7 @@ class CECPEngine (ProtocolEngine):
     
     def __startBlocking (self):
         if self.protover == 1:
-            self.emit("readyForMoves")
+            #self.emit("readyForMoves")
         if self.protover == 2:
             try:
                 r = self.returnQueue.get(True, max(self.timeout-time.time(),0))
@@ -219,8 +219,8 @@ class CECPEngine (ProtocolEngine):
                     r = self.returnQueue.get(True, max(self.timeout-time.time(),0))
             except Queue.Empty:
                 log.warn("Got timeout error\n", self.defname)
-                self.emit("readyForOptions")
-                self.emit("readyForMoves")
+                #self.emit("readyForOptions")
+                #self.emit("readyForMoves")
             else:
                 if r == 'del':
                     raise PlayerIsDead
@@ -296,7 +296,7 @@ class CECPEngine (ProtocolEngine):
             
             finally:
                 # Clear the analyzed data, if any
-                self.emit("analyze", [])
+                #self.emit("analyze", [])
     
     #===========================================================================
     #    Send the player move updates
@@ -335,7 +335,7 @@ class CECPEngine (ProtocolEngine):
                 # Many engines don't like positions able to take down enemy
                 # king. Therefore we just return the "kill king" move
                 # automaticaly
-                self.emit("analyze", [([getMoveKillingKing(self.board)], MATE_VALUE-1)])
+                #self.emit("analyze", [([getMoveKillingKing(self.board)], MATE_VALUE-1)])
                 return
             self.__printColor()
             if self.engineIsInNotPlaying: print >> self.engine, "force"
@@ -621,7 +621,7 @@ class CECPEngine (ProtocolEngine):
             if self.features["draw"]:
                 print >> self.engine, "draw"
         else:
-            self.emit("accept", offer)
+            #self.emit("accept", offer)
     
     def offerError (self, offer, error):
         if self.features["draw"]:
@@ -629,7 +629,7 @@ class CECPEngine (ProtocolEngine):
             # Always assume they are accepts, and if they are not, we get this
             # error and emit offer instead
             if offer.type == DRAW_OFFER and error == ACTION_ERROR_NONE_TO_ACCEPT:
-                self.emit("offer", Offer(DRAW_OFFER))
+                #self.emit("offer", Offer(DRAW_OFFER))
     
     #===========================================================================
     #    Internal
@@ -837,13 +837,13 @@ class CECPEngine (ProtocolEngine):
                 # Don't emit if we weren't able to parse moves, or if we have a move
                 # to kill the opponent king - as it confuses many engines
                 if moves and not self.board.board.opIsChecked():
-                    self.emit("analyze", [(moves, scoreval)])
+                    #self.emit("analyze", [(moves, scoreval)])
                 
                 return
         
         # Offers draw
         if parts[0:2] == ["offer", "draw"]:
-            self.emit("accept", Offer(DRAW_OFFER))
+            #self.emit("accept", Offer(DRAW_OFFER))
             return
         
         # Resigns
@@ -856,7 +856,7 @@ class CECPEngine (ProtocolEngine):
             # commands can validly contain the word "resign" without this
             # being an intentional resign offer.
 
-            self.emit("offer", Offer(RESIGNATION))
+            #self.emit("offer", Offer(RESIGNATION))
             return
         
         #if parts[0].lower() == "error":
@@ -958,8 +958,8 @@ class CECPEngine (ProtocolEngine):
                 print >> self.engine, "new"
 
                 # We are now ready for play:
-                self.emit("readyForOptions")
-                self.emit("readyForMoves")
+                #self.emit("readyForOptions")
+                #self.emit("readyForMoves")
                 self.returnQueue.put("ready")
 
         # A hack to get better names in protover 1.

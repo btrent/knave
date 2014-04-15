@@ -24,7 +24,7 @@ class Player ():
     def setName (self, name):
         """ __repr__ should return this name """
         self.name = name
-        self.emit("name_changed")
+        #self.emit("name_changed")
     
     def __repr__ (self):
         return self.name

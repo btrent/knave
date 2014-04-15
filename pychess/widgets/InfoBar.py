@@ -70,7 +70,7 @@ class InfoBarMessage (gobject.GObject):
         self.buttons.append(button)
         
     def dismiss (self):
-        self.emit("dismissed")
+        #self.emit("dismissed")
         
 class InfoBar (gtk.InfoBar):
     """

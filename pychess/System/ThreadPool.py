@@ -67,8 +67,10 @@ class ThreadPool:
 #        f = os.sep.join((d, f))
         caller = ":".join([str(v) for v in (f,) + framerecord[2:4]])
         module = inspect.getmodule(func)
-        lineno = inspect.getsourcelines(func)[1]
+        #lineno = inspect.getsourcelines(func)[1]
+        lineno = 9999
         callee = ":".join((module.__name__, str(lineno), func.__name__))
+        """
         import GtkWorker
         if module is GtkWorker or "repeat" in str(module):
             framerecord = inspect.stack()[3]
@@ -80,6 +82,7 @@ class ThreadPool:
             framerecord = inspect.stack()[4]
             f = os.path.basename(framerecord[1])
             callee += " -- " + ":".join([str(v) for v in (f,) + framerecord[2:4]])
+        """
 
         s = caller + " -- " + callee
         for repl in ("pychess.", "System.", "Players."):

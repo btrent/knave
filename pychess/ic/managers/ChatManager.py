@@ -36,13 +36,13 @@ class ChatManager ():
                 "channels only for their designated topics.",
                 "SPECIAL NOTE")
         
-        self.connection.expect_line (lambda m: self.emit('channelAdd', m.groups()[0]),
-                "\[(\d+)\] added to your channel list.")
-        self.connection.expect_line (lambda m: self.emit('channelRemove', m.groups()[0]),
-                "\[(\d+)\] removed to your channel list.")
+        #self.connection.expect_line (lambda m: self.emit('channelAdd', m.groups()[0]),
+        #        "\[(\d+)\] added to your channel list.")
+        #self.connection.expect_line (lambda m: self.emit('channelRemove', m.groups()[0]),
+        #        "\[(\d+)\] removed to your channel list.")
         
-        self.connection.expect_line (lambda m: self.emit('channelJoinError', *m.groups()),
-                "Only (.+?) may join channel (\d+)\.")
+        #self.connection.expect_line (lambda m: self.emit('channelJoinError', *m.groups()),
+        #        "Only (.+?) may join channel (\d+)\.")
         
         self.connection.expect_line (self.getNoChannelPlayers,
                 "Channel (\d+) is empty\.")
@@ -122,13 +122,13 @@ class ChatManager ():
     
     def getNoChannelPlayers (self, match):
         channel = match.groups()[0]
-        self.emit('recievedNames', channel, [])
+        #self.emit('recievedNames', channel, [])
     
     def getChannelPlayers(self, matchlist):
         channel, name, people = matchlist[0].groups()
         people += " " + " ".join(matchlist[1:-1])
         people = namesC.findall(titlesC.sub("",people))
-        self.emit('recievedNames', channel, people)
+        #self.emit('recievedNames', channel, people)
     
     def gotPlayerChannels(self, matchlist):
         name = matchlist[0].groups()
@@ -140,18 +140,18 @@ class ChatManager ():
     def onPrivateMessage (self, match):
         name, isadmin, text = match.groups()
         text = self.entityDecode(text)
-        self.emit("privateMessage", name, "title", isadmin, text)
+        #self.emit("privateMessage", name, "title", isadmin, text)
     
     def onAnnouncement (self, match):
         text = match.groups()[0]
         text = self.entityDecode(text)
-        self.emit("announcement", text)
+        #self.emit("announcement", text)
     
     def onChannelMessage (self, match):
         name, isadmin, channel, text = match.groups()
         text = self.entityDecode(text)
         isme = name.lower() == self.connection.username.lower()
-        self.emit("channelMessage", name, isadmin, isme, channel, text)
+        #self.emit("channelMessage", name, isadmin, isme, channel, text)
     
     def onShoutMessage (self, match):
         if len(match.groups()) == 4:
@@ -166,14 +166,16 @@ class ChatManager ():
         # chess matches. Use "shout" for non-chess messages.
         
         # t-shout is used to invite to tournaments
+        """
         if type == "c-":
-            self.emit("channelMessage", name, isadmin, isme, CHANNEL_CSHOUT, text)
+            #self.emit("channelMessage", name, isadmin, isme, CHANNEL_CSHOUT, text)
         else:
-            self.emit("channelMessage", name, isadmin, isme, CHANNEL_SHOUT, text)
+            #self.emit("channelMessage", name, isadmin, isme, CHANNEL_SHOUT, text)
+        """
     
     def toldChannel (self, match):
         amount, channel = match.groups()
-        self.emit("toldChannel", channel, int(amount))
+        #self.emit("toldChannel", channel, int(amount))
     
     def onChannelLogStart (self, match):
         channel, = match.groups()
@@ -186,7 +188,7 @@ class ChatManager ():
         h, m, s, handle, text = match.groups()
         time = self.convTime(int(h), int(m), int(s))
         text = self.entityDecode(text)
-        self.emit("channelLog", self.currentLogChannel, time, handle, text)
+        #self.emit("channelLog", self.currentLogChannel, time, handle, text)
     
     def onChannelLogBreak (self, match):
         self.connection.client.run_command("xtell chlog Next")
@@ -227,7 +229,7 @@ class ChatManager ():
     def getPeopleInChannel (self, channel):
         if channel in (CHANNEL_SHOUT, CHANNEL_CSHOUT):
             people = self.connection.players.get_online_playernames()
-            self.emit('recievedNames', channel, people)
+            #self.emit('recievedNames', channel, people)
         self.connection.client.run_command("inchannel %s" % channel)
     
     def joinChannel (self, channel):

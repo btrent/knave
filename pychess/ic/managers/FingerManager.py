@@ -321,13 +321,13 @@ class FingerManager ():
             else:
                 Log.debug("Ignored fingerline: %s\n" % repr(match.group()))
         
-        self.emit ("fingeringFinished", finger)
+        #self.emit ("fingeringFinished", finger)
     onFinger.BLKCMD = BLKCMD_FINGER
     
     def onRatingAdjust (self, match):
         # Notice: This is only recived for us, not for other persons we finger
         type, old, new = match.groups()
-        self.emit("ratingAdjusted", type, new)
+        #self.emit("ratingAdjusted", type, new)
     
     def finger (self, user):
         self.connection.client.run_command("finger %s" % user)

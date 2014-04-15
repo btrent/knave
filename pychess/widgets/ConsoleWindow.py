@@ -113,7 +113,7 @@ class ConsoleView (gtk.VPaned):
             if not event.state & gtk.gdk.CONTROL_MASK:
                 buffer = self.writeView.get_buffer()
                 self.connection.client.run_command(buffer.props.text)
-                self.emit("messageTyped", buffer.props.text)
+                #self.emit("messageTyped", buffer.props.text)
                 self.addMessage(buffer.props.text, my=True)
                 adj = self.sw.get_vadjustment()
                 adj.set_value(adj.get_upper())

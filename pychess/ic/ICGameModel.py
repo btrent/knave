@@ -185,7 +185,7 @@ class ICGameModel (GameModel):
         pass
 
     def onActionError (self, om, offer, error):
-        self.emit("action_error", offer, error)
+        #self.emit("action_error", offer, error)
     
     #
     # End

@@ -173,7 +173,7 @@ class BoardView (gtk.DrawingArea):
     def game_started_after (self, model):
         # reenable shrinking the board
         self.set_size_request(-1, -1)
-        self.emit("shown_changed", self.shown)
+        #self.emit("shown_changed", self.shown)
     
     def game_started (self, model):
         if conf.get("noAnimation", False):
@@ -355,7 +355,7 @@ class BoardView (gtk.DrawingArea):
             self._shown = shown
             if shown > self.model.lowply:
                 self.lastMove = self.model.getMoveAtPly(shown-1, self.shownVariationIdx)
-            self.emit("shown_changed", self.shown)
+            #self.emit("shown_changed", self.shown)
             self.redraw_canvas()
             return
         
@@ -404,7 +404,7 @@ class BoardView (gtk.DrawingArea):
         
         self._shown = shown
         if self.realSetShown:
-            self.emit("shown_changed", self.shown)
+            #self.emit("shown_changed", self.shown)
         
         self.animationStart = time()
         if self.lastMove:

@@ -144,12 +144,12 @@ class EngineDiscoverer (GObject, PooledThread):
             subproc.start()
         except SubProcessError, e:
             log.warn("Engine %s failed discovery: %s" % (engine["name"],e))
-            self.emit("engine_failed", engine["name"], engine)
+            #self.emit("engine_failed", engine["name"], engine)
         except PlayerIsDead, e:
             # Check if the player died after engine_discovered by our own hands
             if not self.toBeRechecked[engine["name"]][1]:
                 log.warn("Engine %s failed discovery: %s" % (engine["name"],e))
-                self.emit("engine_failed", engine["name"], engine)
+                #self.emit("engine_failed", engine["name"], engine)
     
     def __discoverE2 (self, subproc, engine):
         if engine.get("protocol") == "uci":
@@ -161,12 +161,12 @@ class EngineDiscoverer (GObject, PooledThread):
         exitcode = subproc.kill(UNKNOWN_REASON)
         if exitcode:
             log.debug("Engine failed %s\n" % engine["name"])
-            self.emit("engine_failed", engine['name'], engine)
+            #self.emit("engine_failed", engine['name'], engine)
             return
         
         engine['recheck'] = False
         log.debug("Engine finished %s\n" % engine["name"])
-        self.emit ("engine_discovered", engine['name'], engine)
+        #self.emit ("engine_discovered", engine['name'], engine)
     
     
     ############################################################################
@@ -264,17 +264,17 @@ class EngineDiscoverer (GObject, PooledThread):
                 self.toBeRechecked[name][1] = True
             if all([elem[1] for elem in self.toBeRechecked.values()]):
                 self.engines.sort(key=lambda x: x["name"])
-                self.emit("all_engines_discovered")
+                #self.emit("all_engines_discovered")
         self.connect("engine_discovered", count, True)
         self.connect("engine_failed", count, False)
         
         if self.toBeRechecked:
-            self.emit("discovering_started", self.toBeRechecked.keys())
+            #self.emit("discovering_started", self.toBeRechecked.keys())
             self.connect("all_engines_discovered", self.save)
             for engine, need in self.toBeRechecked.values():
                 self.__discoverE(engine)
         else:
-            self.emit("all_engines_discovered")
+            #self.emit("all_engines_discovered")
             
     ############################################################################
     # Interaction                                                              #

@@ -63,18 +63,18 @@ class ICLounge (GObject):
 
         def on_window_delete (window, event):
             self.close()
-            self.emit("logout")
+            #self.emit("logout")
             return True
         self.widgets["fics_lounge"].connect("delete-event", on_window_delete)
 
         def on_logoffButton_clicked (button):
             self.close()
-            self.emit("logout")
+            #self.emit("logout")
         self.widgets["logoffButton"].connect("clicked", on_logoffButton_clicked)        
 
         def on_autoLogout (alm):
             self.close()
-            self.emit("autoLogout")
+            #self.emit("autoLogout")
         self.connection.alm.connect("logOut", on_autoLogout)
 
         self.connection.connect("disconnected", lambda connection: self.close())

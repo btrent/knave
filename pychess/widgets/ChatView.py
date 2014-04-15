@@ -97,7 +97,7 @@ class ChatView (gtk.VPaned):
         tb.insert_with_tags_by_name(iter, sender+": ", pref+"_bold")
         tb.insert(iter, text)
         # This is used to buzz the user and add senders to a list of active participants
-        self.emit("messageAdded", sender, text, self.colors[pref])
+        #self.emit("messageAdded", sender, text, self.colors[pref])
     
     def insertLogMessage (self, timestamp, sender, text):
         """ Takes a list of (timestamp, sender, text) pairs, and inserts them in
@@ -140,6 +140,6 @@ class ChatView (gtk.VPaned):
         if event.keyval in map(keyval_from_name,("Return", "KP_Enter")):
             if not event.state & gtk.gdk.CONTROL_MASK:
                 buffer = self.writeView.get_buffer()
-                self.emit("messageTyped", buffer.props.text)
+                #self.emit("messageTyped", buffer.props.text)
                 buffer.props.text = ""
                 return True

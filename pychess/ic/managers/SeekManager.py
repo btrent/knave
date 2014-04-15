@@ -29,7 +29,7 @@ class SeekManager ():
         
         self.connection = connection
         
-        self.connection.expect_line (self.on_seek_clear, "<sc>")
+        #self.connection.expect_line (self.on_seek_clear, "<sc>")
         self.connection.expect_line (self.on_seek_add, "<s(?:n?)> (.+)")
         self.connection.expect_n_lines (self.on_our_seeks_removed,
             "<sr> ([\d ]+)",
@@ -122,27 +122,27 @@ class SeekManager ():
                     seek["color"] = "white"
                 elif value == "B":
                     seek["color"] = "black"
-        self.emit("addSeek", seek)
+        #self.emit("addSeek", seek)
     on_seek_add.BLKCMD = BLKCMD_SEEK
     
-    def on_seek_clear (self, *args):
-        self.emit("clearSeeks")
+    #def on_seek_clear (self, *args):
+        #self.emit("clearSeeks")
     
     def on_seek_remove (self, match):
         for key in match.groups()[0].split(" "):
             if not key: continue
-            self.emit("removeSeek", key)
+            #self.emit("removeSeek", key)
     on_seek_remove.BLKCMD = BLKCMD_UNSEEK
     
     def on_our_seeks_removed (self, matchlist):
         self.on_seek_remove(matchlist[0])
-        self.emit("our_seeks_removed")
+        #self.emit("our_seeks_removed")
     on_our_seeks_removed.BLKCMD = BLKCMD_UNSEEK
     
     def on_seek_updated (self, matchlist):
         self.on_seek_remove(matchlist[2])
         self.on_seek_add(matchlist[4])
-        self.emit("seek_updated", matchlist[0].groups()[1])
+        #self.emit("seek_updated", matchlist[0].groups()[1])
     on_seek_updated.BLKCMD = BLKCMD_SEEK
     
     def refresh_seeks (self):

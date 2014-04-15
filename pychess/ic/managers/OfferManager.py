@@ -58,7 +58,8 @@ class OfferManager ():
         self.connection.expect_line (self.onOfferAdd,
                 "<p(t|f)> (\d+) w=%s t=(\w+) p=(.+)" % names)
         self.connection.expect_line (self.onOfferRemove, "<pr> (\d+)")
-        
+
+        """
         for ficsstring, offer, error in (
                 ("You cannot switch sides once a game is underway.", 
                         Offer(SWITCH_OFFER), ACTION_ERROR_SWITCH_UNDERWAY),
@@ -70,10 +71,11 @@ class OfferManager ():
                         Offer(FLAG_CALL), ACTION_ERROR_CLOCK_NOT_STARTED),
                 ("The clock is not paused.",
                         Offer(RESUME_OFFER), ACTION_ERROR_CLOCK_NOT_PAUSED)):
-            self.connection.expect_line (
-                    lambda match: self.emit("onActionError", offer, error),
-                    ficsstring)
-        
+            #self.connection.expect_line (
+             #       lambda match: self.emit("onActionError", offer, error),
+             #       ficsstring)
+        """
+
         self.connection.expect_line (self.notEnoughMovesToUndo,
             "There are (?:(no)|only (\d+) half) moves in your game\.")
         
@@ -92,7 +94,7 @@ class OfferManager ():
         Log.debug("OfferManager.onOfferDeclined: match.string=%s\n" % match.string)
         type = match.groups()[0]
         offer = Offer(strToOfferType[type])
-        self.emit("onOfferDeclined", offer)
+        #self.emit("onOfferDeclined", offer)
     
     def noOffersToAccept (self, match):
         offertype, request = match.groups()
@@ -103,14 +105,14 @@ class OfferManager ():
         elif request == "decline":
             error = ACTION_ERROR_NONE_TO_DECLINE
         offer = Offer(strToOfferType[offertype])
-        self.emit("onActionError", offer, error)
+        #self.emit("onActionError", offer, error)
     
     def notEnoughMovesToUndo (self, match):
         ply = match.groups()[0] or match.groups()[1]
         if ply == "no": ply = 0
         else: ply = int(ply)
         offer = Offer(TAKEBACK_OFFER, param=self.lastPly-ply)
-        self.emit("onActionError", offer, ACTION_ERROR_TOO_LARGE_UNDO)
+        #self.emit("onActionError", offer, ACTION_ERROR_TOO_LARGE_UNDO)
     
     def onOfferAdd (self, match):
         Log.debug("OfferManager.onOfferAdd: match.string=%s\n" % match.string)
@@ -164,21 +166,23 @@ class OfferManager ():
             rated = rated == "unrated" and "u" or "r"
             match = {"gametype": gametype, "w": fname, "rt": rating, "color": col,
                 "r": rated, "t": mins, "i": incr, "is_adjourned": is_adjourned}
-            self.emit("onChallengeAdd", index, match)
+            #self.emit("onChallengeAdd", index, match)
         
         else:
             Log.debug("OfferManager.onOfferAdd: emitting onOfferAdd: %s\n" % offer)
-            self.emit("onOfferAdd", offer)
+            #self.emit("onOfferAdd", offer)
     
     def onOfferRemove (self, match):
         Log.debug("OfferManager.onOfferRemove: match.string=%s\n" % match.string)
         index = int(match.groups()[0])
         if not index in self.offers:
             return
+        """
         if self.offers[index].type == MATCH_OFFER:
-            self.emit("onChallengeRemove", index)
+            #self.emit("onChallengeRemove", index)
         else:
-            self.emit("onOfferRemove", self.offers[index])
+            #self.emit("onOfferRemove", self.offers[index])
+        """
         del self.offers[index]
     
     ###

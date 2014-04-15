@@ -154,7 +154,9 @@ class BoardManager ():
 
        
         self.connection = connection
-        
+
+        self.connection.expect_line(self.onObs, "You are now observing game (\d+)")
+
         self.connection.expect_line (self.onStyle12, "<12> (.+)")
         
         self.connection.expect_line (self.onWasPrivate,
@@ -181,7 +183,7 @@ class BoardManager ():
         
         self.connection.expect_line (self.onUnobserveGame,
                 "Removing game (\d+) from observation list\.")
-        
+
         self.queuedEmits = {}
         self.gamemodelStartedEvents = {}
         self.theGameImPlaying = None
@@ -207,8 +209,8 @@ class BoardManager ():
         # We don't use deltamoves as fisc won't send them with variants
         #self.connection.lvm.setVariable("compressmove", 1)
 
-    def start (self):    
-        self.connection.games.connect("FICSGameEnded", self.onGameEnd)
+#    def start (self):    
+#        self.connection.games.connect("FICSGameEnded", self.onGameEnd)
         
     @classmethod
     def parseStyle12 (cls, line, castleSigns=None):
@@ -288,9 +290,16 @@ class BoardManager ():
         game = self.connection.games.get(game, emit=False)
         return game
 
+    def onObs(self, match):
+        gameno = match.groups()[0]
+        self.connection.app.board.new_game(gameno)
+
     def onStyle12 (self, match):
         style12 = match.groups()[0]
         gameno = int(style12.split()[15])
+
+        if (self.connection.app.board.new_gameno is not None):
+            self.connection.app.board.reset_style12(style12)
         
         if gameno in self.queuedStyle12s:
             self.queuedStyle12s[gameno].append(style12)
@@ -315,6 +324,7 @@ class BoardManager ():
                 if relation == IC_POS_OBSERVING:
                     game = self.__createGame(gameno, wname, bname, wms, bms, fen)
                     if game.supported:
+                        print "now observing here"
                         self.observe(game)
 
         # self.emit("boardUpdate", gameno, ply, curcol, lastmove, fen, wname, bname, wms, bms)
@@ -336,13 +346,15 @@ class BoardManager ():
         game.private = True
     
     def tooManySeeks (self, match):
-        self.emit("tooManySeeks")
+        pass
+        #self.emit("tooManySeeks")
+
     tooManySeeks.BLKCMD = BLKCMD_SEEK
     
     def matchDeclined (self, match):
         decliner, = match.groups()
         decliner = self.connection.players.get(FICSPlayer(decliner), create=False)
-        self.emit("matchDeclined", decliner)
+        #self.emit("matchDeclined", decliner)
     
     @classmethod
     def generateCastleSigns (cls, style12, game_type):
@@ -395,7 +407,7 @@ class BoardManager ():
         
         self.theGameImPlaying = game
         self.gamemodelStartedEvents[gameno] = threading.Event()
-        self.emit("playGameCreated", game)
+        #self.emit("playGameCreated", game)
     
     def parseGame (self, matchlist, gameclass, in_progress=False):
         """ 
@@ -653,7 +665,7 @@ class BoardManager ():
     def onObserveGameCreated (self, matchlist):
         game = self.parseGame(matchlist, FICSGame, in_progress=True)
         self.gamesImObserving[game] = None
-        self.emit ("obsGameCreated", game)
+        #self.emit ("obsGameCreated", game)
         
         if game.gameno in self.gamemodelStartedEvents:
             self.gamemodelStartedEvents[game.gameno].wait()
@@ -662,12 +674,15 @@ class BoardManager ():
         del self.queuedEmits[game.gameno]
     onObserveGameCreated.BLKCMD = BLKCMD_MOVES
 
+    def onCurGameEnded(self):
+        print "onCurGameEnded"
+
     def onGameEnd (self, games, game):
         Log.debug("BM.onGameEnd: %s\n" % game)
         if game == self.theGameImPlaying:
             if game.gameno in self.gamemodelStartedEvents:
                 self.gamemodelStartedEvents[game.gameno].wait()
-            self.emit("curGameEnded", game)
+            #self.emit("curGameEnded", game)
             self.theGameImPlaying = None
             del self.gamemodelStartedEvents[game.gameno]
             
@@ -675,8 +690,8 @@ class BoardManager ():
             Log.debug("BM.onGameEnd: %s: gamesImObserving\n" % game)
             if game.gameno in self.queuedEmits:
                 Log.debug("BM.onGameEnd: %s: queuedEmits\n" % game)
-                self.queuedEmits[game.gameno].append(
-                    lambda:self.emit("obsGameEnded", game))
+                #self.queuedEmits[game.gameno].append(
+                #    lambda:self.emit("obsGameEnded", game))
             else:
                 try:
                     event = self.gamemodelStartedEvents[game.gameno]
@@ -686,9 +701,11 @@ class BoardManager ():
                     Log.debug("BM.onGameEnd: %s: event.wait()\n" % game)
                     event.wait()
                 del self.gamesImObserving[game]
-                self.emit("obsGameEnded", game)
+                #self.emit("obsGameEnded", game)
     
     def onGamePause (self, match):
+        pass
+        """
         gameno, state = match.groups()
         gameno = int(gameno)
         if gameno in self.queuedEmits:
@@ -697,8 +714,9 @@ class BoardManager ():
         else:
             if gameno in self.gamemodelStartedEvents:
                 self.gamemodelStartedEvents[gameno].wait()
-            self.emit("gamePaused", gameno, state=="paused")
-    
+            #self.emit("gamePaused", gameno, state=="paused")
+        """
+
     def onUnobserveGame (self, match):
         gameno = int(match.groups()[0])
         Log.debug("BM.onUnobserveGame: gameno: %s\n" % gameno)
@@ -706,7 +724,7 @@ class BoardManager ():
             del self.gamemodelStartedEvents[gameno]
             game = self.connection.games.get_game_by_gameno(gameno)
         except KeyError: return
-        self.emit("obsGameUnobserved", game)
+        #self.emit("obsGameUnobserved", game)
         # TODO: delete self.castleSigns[gameno] ?
     onUnobserveGame.BLKCMD = BLKCMD_UNOBSERVE
         

@@ -177,7 +177,7 @@ class SpotGraph (gtk.EventBox):
         if self.hovered:
             self.redraw_canvas(self.getBounds(self.hovered))
             if self.pointIsOnSpot (event.x+alloc.x, event.y+alloc.y, self.hovered):
-                self.emit("spotClicked", self.hovered[3])
+                #self.emit("spotClicked", self.hovered[3])
     
     def motion_notify (self, widget, event):
         alloc = self.get_allocation()

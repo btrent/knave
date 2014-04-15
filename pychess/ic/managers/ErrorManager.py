@@ -14,12 +14,12 @@ class ErrorManager ():
     
     def onError (self, match):
         command = match.groups()[0]
-        self.emit("onCommandNotFound", command)
+        #self.emit("onCommandNotFound", command)
     
     def onAmbiguousMove (self, match):
         move = match.groups()[0]
-        self.emit("onAmbiguousMove", move)
+        #self.emit("onAmbiguousMove", move)
     
     def onIllegalMove (self, match):
         move = match.groups()[0]
-        self.emit("onIllegalMove", move)
+        #self.emit("onIllegalMove", move)

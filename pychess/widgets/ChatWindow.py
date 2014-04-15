@@ -149,7 +149,7 @@ class TextImageTree (gtk.TreeView):
                 id = self.props.model.get_value(iter, 0)
                 text = self.props.model.get_value(iter, 1)
                 type = self.props.model.get_value(iter, 2)
-                self.emit("activated", id, text, type)
+                #self.emit("activated", id, text, type)
         self.pressed = None
     
     def motion_notify (self, widget, event):
@@ -167,7 +167,7 @@ class TextImageTree (gtk.TreeView):
         if iter:
             id = model.get_value(iter, 0)
             type = model.get_value(iter, 2)
-            self.emit("selected", id, type)
+            #self.emit("selected", id, type)
 
 class Panel:
     def start (self): pass
@@ -525,7 +525,7 @@ class ChannelsPanel (gtk.ScrolledWindow, Panel):
         if id in list:
             list.removeRow(id)
         self.joinedList.addRow(id, text, type)
-        self.emit('conversationAdded', id, text, type)
+        #self.emit('conversationAdded', id, text, type)
         if type == TYPE_CHANNEL:
             self.connection.cm.joinChannel(id)
         self.joinedList.selectRow(id)
@@ -536,12 +536,12 @@ class ChannelsPanel (gtk.ScrolledWindow, Panel):
             self.channelsList.addRow(id, text, type)
         elif type == TYPE_PERSONAL:
             self.playersList.addRow(id, text, type)
-        self.emit('conversationRemoved', id)
+        #self.emit('conversationRemoved', id)
         if type == TYPE_CHANNEL:
             self.connection.cm.removeChannel(id)
     
     def onSelect (self, joinedList, id, type):
-        self.emit('conversationSelected', id)
+        #self.emit('conversationSelected', id)
     
     def onPersonMessage (self, cm, name, title, isadmin, text):
         if not self.compileId(name, TYPE_PERSONAL) in self.joinedList:

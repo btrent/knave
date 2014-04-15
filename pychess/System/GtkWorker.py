@@ -176,7 +176,7 @@ class GtkWorker (GObject, Thread):
             try:
                 # In python 2.5 we can use self.publishQueue.join() to wait for
                 # all publish items to have been processed.
-                self.emit("done", self.result)
+                #self.emit("done", self.result)
             finally:
                 glock.release()
     

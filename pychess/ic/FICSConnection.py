@@ -5,7 +5,7 @@ import threading
 from collections import defaultdict
 
 import pychess
-from pychess.System.Log import Log
+from pychess.System.Log import Log as log
 from pychess.System.ThreadPool import PooledThread
 from pychess.Utils.const import *
 
@@ -34,11 +34,12 @@ from VerboseTelnet import NLinesPrediction
 class LogOnError (StandardError): pass
 
 class Connection (PooledThread):
+#class Connection (threading.Thread):
     
 
     
     def __init__ (self, host, ports, username, password, app=None):
-
+        #super(Connection, self).__init__()
 
         self.app = app
         self.host = host
@@ -114,6 +115,7 @@ BADPAS = _("The entered password was invalid.\n" + \
 class FICSConnection (Connection):
 
     def __init__ (self, host, ports, username="guest", password="", conn=None, app=None):
+        print "initializing"
         Connection.__init__(self, host, ports, username, password, app)
         self.conn = conn
         self.registred = None
@@ -121,14 +123,18 @@ class FICSConnection (Connection):
         if self.conn is None:
             self.players = FICSPlayers(self)
             self.games = FICSGames(self)
-    
+
+        if host != '':
+            self._connect()
+
     def _connect (self):
         self.connecting = True
-        self.emit("connecting")
+        print "connecting"
+
         try:
             self.client = TimeSeal()
             
-            self.emit('connectingMsg', _("Connecting to server"))
+            print "Connecting to server"
             for i, port in enumerate(self.ports):
                 log.debug("Trying port %d\n" % port, (self.host, "raw"))
                 try:
@@ -143,7 +149,7 @@ class FICSConnection (Connection):
                     break
             
             self.client.read_until("login: ")
-            self.emit('connectingMsg', _("Logging on to server"))
+            print "Logging on to server"
             
             if self.username and self.username != "guest":
                 print >> self.client, self.username
@@ -184,7 +190,7 @@ class FICSConnection (Connection):
             
             self.client.readuntil("ics%")
             
-            self.emit('connectingMsg', _("Setting up environment"))
+            print "Setting up environment"
             self.client = PredictionsTelnet(self.client, self.predictions, self.reply_cmd_dict)
             self.client.setLinePrefix("fics%")
             
@@ -207,6 +213,7 @@ class FICSConnection (Connection):
                 self.client.run_command("set gin 1")
                 self.client.run_command("set availinfo 1")
                 self.client.run_command("iset allresults 1")
+                self.client.run_command("set style 12")
                 
                 # New ivar pin
                 # http://www.freechess.org/Help/HelpFiles/new_features.html
@@ -222,7 +229,7 @@ class FICSConnection (Connection):
                 self.lvm = ListAndVarManager(self)
                 while not self.lvm.isReady():
                     self.client.handleSomeText()
-                self.lvm.setVariable("interface", NAME+" "+pychess.VERSION)
+                self.lvm.setVariable("interface", "Knave v0.0.1")
 
                 # FIXME: Some managers use each other to avoid regexp collapse. To
                 # avoid having to init the in a specific order, connect calls should
@@ -239,9 +246,9 @@ class FICSConnection (Connection):
                 self.alm = AutoLogOutManager(self)
                 self.adm = AdjournManager(self)
                 self.com = ConsoleManager(self)
-                self.bm.start()
-                self.players.start()
-                self.games.start()
+#                self.bm.start()
+#                self.players.start()
+#                self.games.start()
 
                 # disable setting iveriables from console
                 self.lvm.setVariable("lock", 1)
@@ -249,8 +256,8 @@ class FICSConnection (Connection):
             self.connecting = False
             self.connected = True
             
-            if self.conn is None:
-                self.emit("connected")
+#            if self.conn is None:
+#                #self.emit("connected")
 
             def keep_alive():
                 while(True):
@@ -277,13 +284,14 @@ class FICSConnection (Connection):
                 for errortype in (IOError, LogOnError, EOFError,
                                   socket.error, socket.gaierror, socket.herror):
                     if isinstance(e, errortype):
-                        self.emit("error", e)
+                        #self.emit("error", e)
                         break
                 else:
                     raise
-        
-        finally:
-            self.emit("disconnected")
+        except:
+            pass
+        #finally:
+            #self.emit("disconnected")
     
     def close (self):
         if self.isConnected():

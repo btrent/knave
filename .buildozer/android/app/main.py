@@ -47,12 +47,14 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.animation import Animation
 from kivy.properties import ListProperty
 
-from chess.game import Game, ClassicalGame
 from chesstools import Board, Move
 from sets import Set
 import itertools as it
 from operator import attrgetter
 from time import sleep
+
+from pychess.ic.FICSConnection import FICSConnection
+from pychess.ic.managers.BoardManager import BoardManager
 
 """
 from chess.game import Game
@@ -335,17 +337,13 @@ class ChessBoardWidget(Widget):
         self._draw_pieces()
 
     def _animate_piece(self, touch, pos):
+        # this is handled elsewhere, right?
         return
         """
-        if kivy.utils.platform().startswith('and'):
-            # bug in kivy for android: screen flashes if we don't do this
-            # but if we do it on other platforms, animation doesn't work
-            self._moving_piece.moving = False
-        """
-
         self._draw_board()
         self._draw_pieces(skip=self._moving_piece_from)
         self._draw_piece(self._moving_piece, pos)
+        """
 
     def mouse_callback(self, instance, value):
         touch = Touch(value[0],value[1])
@@ -366,6 +364,16 @@ class ChessBoardWidget(Widget):
         super(ChessBoardWidget, self).__init__(**kwargs)
         self.app = app
         self.board = Board()
+        """
+        self.aa = None
+        self.bb = 'rnbqr-k- pp---pbp --pp-np- ----p--- ---PP-P- --N-BP-- PPPQN--P --KR-B-R B 6 0 0 0 0 0 281 BigLion micker 0 1 0 39 39 51 52 9 P/g2-g4 (0:02) g4 0 1 0'
+        self.cc = self.bb.split()
+        self.board.reset_style12(self.bb)
+        for aaa in self.board.position:
+            for aaaa in aaa:
+                print aaaa
+        sys.exit(1)
+        """
         self.app.board = self.board
         self.board.app = self.app # textbook OO
         self.last_move_san = None
@@ -897,12 +905,27 @@ class Knave(App):
             return '*'
 
     def on_load(self, i):
-#        if not self.is_desktop:
-#            return
-#        if (len(sys.argv) < 1):
-#            if sys.argv[1] == "test":
-         if True:
-             if True:
+        # REMOVE
+        print "in on load"
+        self.connection = FICSConnection("freechess.org",[5000],"guest","",None,self)
+        self.board_manager = BoardManager(self.connection)
+        print "starting connection"
+        self.connection.start()
+        print "connection started"
+        #sys.exit(1)
+
+        import threading
+        threading.Timer(5,self.connection.client.run_command, ["ob /l"]).start()
+        #self.connection.client.run_command("ob /l")
+
+        # END REMOVE
+
+        if not self.is_desktop:
+            return
+        if (len(sys.argv) < 1):
+            if sys.argv[1] == "test":
+#         if True:
+#             if True:
                 # hack because there doesn't appear to be a real on_load in kivy
                 if (i != 2):
                     import threading
@@ -920,6 +943,7 @@ class Knave(App):
             Config.write()
 
         self.connection = None
+        self.board_manager = None
         self.custom_fen = None
         self.pyfish_fen = 'startpos'
         self.variation_dropdown = None
@@ -982,7 +1006,6 @@ class Knave(App):
         parent = GridLayout(size_hint=(1,1), cols=1, orientation = 'vertical')
         # box = BoxLayout(spacing=10, padding=(10,10))
         self.board_widget = ChessBoardWidget(self)
-        self.game = ClassicalGame(self.board_widget)
 
             # self.create_chess_board(self.squares)
 

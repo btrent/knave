@@ -26,8 +26,10 @@ class ListAndVarManager:
                 "-- (\w+) list: ([1-9]\d*) \w+ --",
                 "(?:\w+ *)+$")
         
-        self.connection.client.run_command("showlist")
-        
+        #disabling for now because this is too slow
+        #self.connection.client.run_command("showlist")
+        self.listLock.release()
+
         # Variables
         self.variablesBackup = {}
         self.variables = {}

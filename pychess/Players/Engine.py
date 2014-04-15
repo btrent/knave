@@ -116,5 +116,5 @@ class Engine (Player):
             ss = "<b>DMPGirl:</b>"
             es = "<br>"
             answer = data[data.find(ss)+len(ss) : data.find(es,data.find(ss))]
-            self.emit("offer", Offer(CHAT_ACTION, answer))
+            #self.emit("offer", Offer(CHAT_ACTION, answer))
         pool.start(answer, message)

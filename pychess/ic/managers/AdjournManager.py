@@ -32,7 +32,8 @@ class AdjournManager ():
         self.connection.expect_line (self.__onAdjournedGameResigned,
                                      "You have resigned the game\.")
 
-        self.connection.bm.connect("curGameEnded", self.__onCurGameEnded)
+        # self.connection.bm.connect("curGameEnded", self.__onCurGameEnded)
+        self.connection.bm.onCurGameEnded()
         
         self.queryAdjournments()
         
@@ -81,19 +82,20 @@ class AdjournManager ():
             
             if game not in self.connection.games:
                 game = self.connection.games.get(game, emit=False)
-                self.emit("adjournedGameAdded", game)
+                #self.emit("adjournedGameAdded", game)
             adjournments.append(game)
             
-        self.emit("onAdjournmentsList", adjournments)
+        #self.emit("onAdjournmentsList", adjournments)
         
     def __onStoredResponseNO (self, match):
-        self.emit("onAdjournmentsList", [])
+        pass
+        #self.emit("onAdjournmentsList", [])
     
     def __onSmovesResponse (self, matchlist):
         game = self.connection.bm.parseGame(matchlist, FICSAdjournedGame,
                                             in_progress=False)
         if game is None: return
-        self.emit("adjournedGamePreview", game)
+        #self.emit("adjournedGamePreview", game)
     __onSmovesResponse.BLKCMD = BLKCMD_SMOVES
     
     def __onAdjournedGameResigned (self, match):

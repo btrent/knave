@@ -4,7 +4,7 @@ class AutoLogOutManager ():
 
     
     def __init__ (self, connection):
-        GObject.__init__(self)
+
         self.connection = connection
         
         self.connection.expect_line (self.onLogOut,
@@ -14,4 +14,4 @@ class AutoLogOutManager ():
            "\*\*\*\* .+? has arrived - you can't both be logged in\. \*\*\*\*")
     
     def onLogOut (self, match):
-        self.emit("logOut")
+        print "Logout"

@@ -11,4 +11,5 @@ class ConsoleManager ():
         self.connection.client.consolehandler = ConsoleHandler(self.onConsoleMessage)
 
     def onConsoleMessage (self, line, block_code):
-        self.emit("consoleMessage", line, block_code)
+        pass
+        #self.emit("consoleMessage", line, block_code)

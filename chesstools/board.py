@@ -2,7 +2,7 @@
 
 import random
 from chesstools import COLORS
-from chesstools.piece import Pawn, Knight, Bishop, Rook, Queen, King
+from chesstools.piece import Pawn, Knight, Bishop, Rook, Queen, King, LETTER_TO_PIECE
 from chesstools.move import to_algebraic, Move
 
 LINEUP = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
@@ -11,6 +11,7 @@ PROMOS = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen}
 class Board(object):
 
     app = None
+    new_gameno = None
 
     def __init__(self, old_board=None, variant="standard", lineup=None):
         if old_board:
@@ -102,6 +103,70 @@ class Board(object):
         self.changes = []
         self.captured = None
 
+    #rnbqr-k- pp---pbp --pp-np- ----p--- ---PP-P- --N-BP-- PPPQN--P --KR-B-R B 6 0 0 0 0 0 281 BigLion micker 0 1 0 39 39 51 52 9 P/g2-g4 (0:02) g4 0 1 0
+    def reset_style12(self, style12, refresh=True):
+        data = style12.split()
+        self.turn = 'white' if data[8] is 'W' else 'black'
+        self.position = self.get_style12_position(self.position, data, 7)
+
+        # find kings
+        self.kings = {}
+        for i in range(0,8):
+            k = data[i].find('k')
+            if k != -1:
+                king = self.position[7-i][k]
+                self.kings['black'] = king
+
+            k = data[i].find('K')
+            if k != -1:
+                king = self.position[7-i][k]
+                self.kings['white'] = king
+
+        # set castling
+        # this is the most unnecessarily difficult way to implement castling that I have seen
+        # TODO tear this out
+
+        #can white castle short?
+        if (data[9] == 1):
+            self.position[0][7].castle_king_column = 6
+            self.position[0][7].side = 'king'
+            self.kings['white'].castle['king'] = self.position[0][7]
+        #can white castle long?
+        if (data[10] == 1):
+            self.position[0][0].castle_king_column = 2
+            self.position[0][0].side = 'queen'
+            self.kings['white'].castle['queen'] = self.position[0][0]
+        #can black castle short?
+        if (data[11] == 1):
+            self.position[7][7].castle_king_column = 6
+            self.position[7][7].side = 'king'
+            self.kings['black'].castle['king'] = self.position[7][7]
+        #can black castle long?
+        if (data[12] == 1):
+            self.position[7][0].castle_king_column = 2
+            self.position[7][0].side = 'queen'
+            self.kings['black'].castle['queen'] = self.position[7][0]
+
+        self.en_passant = None
+        if data[9] != '-1':
+            row = 2 if self.turn == 'white' else 5
+            self.en_passant = [row, int(data[9])]
+
+        self.fullmove = int(data[23])
+        self.halfmove = int(data[23]) * 2 - 2
+        if self.turn == 'black':
+            self.halfmove += 1
+
+        self.this_position = self.fen_signature()
+        self.all_positions = {self.this_position:1}
+        self.changes = [] #TODO: what is this?
+        self.captured = None #TODO: parse this
+
+        if (refresh is True):
+            print "attempting to update board..."
+            self.app.board_widget.set_position(self.fen())
+            self.app.board_widget.on_size()
+
     def reset_960(self, lineup=None):
         if lineup:
             self.LINEUP = lineup
@@ -123,6 +188,26 @@ class Board(object):
             self.LINEUP[k] = Rook
             self.LINEUP[r2] = King
         self.reset(hard=False)
+
+    def get_style12_position(self, position, data, index):
+        if (index > 7) or (index < 0):
+            return position
+
+        if index == 7:
+            position = [[]] * 8
+
+        tmp = [None] * 8
+        for i in range(0,8):
+            if (data[index][i] != '-'):
+                color = 'black' if data[index][i].islower() else 'white'
+                tmp[i] = LETTER_TO_PIECE[data[index][i].upper()](self, color, (index,i+1))
+
+        position[7-index] = tmp
+        index -= 1
+        if (index >= 0):
+            position = self.get_style12_position(position, data, index)
+
+        return position
 
     def _fen_layout(self):
         pieces = []
@@ -270,6 +355,9 @@ class Board(object):
             return "stalemate"
         else:
             return "checkmate"
+
+    def new_game(self, gameno):
+        self.new_gameno = gameno
 
     def update(self, gameno, ply, curcol, lastmove, lastmove_lan, fen, wname, bname, wms, bms):
         if lastmove is not None:

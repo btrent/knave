@@ -343,9 +343,9 @@ class FICSPlayers ():
         self.players_cids = {}
         self.connection = connection
     
-    def start (self):
+#    def start (self):
 #        self.connection.fm.connect("fingeringFinished", self.onFinger)
-        pass
+#        pass
 
     def __getitem__ (self, player):
         if type(player) is not FICSPlayer: raise TypeError("%s" % repr(player))
@@ -389,7 +389,8 @@ class FICSPlayers ():
     
     def online_changed (self, player, property):
         if player.online:
-            self.emit("FICSPlayerEntered", player)
+            pass
+            #self.emit("FICSPlayerEntered", player)
     
     # This method is a temporary hack until ChatWindow/ChatManager are
     # converted to use FICSPlayer references rather than player's names
@@ -417,7 +418,7 @@ class FICSPlayers ():
             player.status = IC_STATUS_OFFLINE
             if not player.adjournment and not player.keep_after_logout:
                 del self[player]
-            self.emit('FICSPlayerExited', player)
+            #self.emit('FICSPlayerExited', player)
     
 #    def onFinger (self, fm, finger):
 #        player = FICSPlayer(finger.getName())
@@ -598,9 +599,9 @@ class FICSGames ():
         self.games_by_gameno = {}
         self.connection = connection
 
-    def start (self):
-        self.connection.adm.connect("onAdjournmentsList", self.onAdjournmentsList)
-        self.connection.bm.connect("curGameEnded", self.onCurGameEnded)
+#    def start (self):
+#        self.connection.adm.connect("onAdjournmentsList", self.onAdjournmentsList)
+#        self.connection.bm.connect("curGameEnded", self.onCurGameEnded)
     
     def __getitem__ (self, game):
         if not isinstance(game, FICSGame):
@@ -651,7 +652,8 @@ class FICSGames ():
         elif create:
             self[game] = game
             if emit:
-                self.emit("FICSGameCreated", game)
+                pass
+                #self.emit("FICSGameCreated", game)
         else:
             raise KeyError
         return game
@@ -660,7 +662,7 @@ class FICSGames ():
         if game in self:
             game = self[game]
             del self[game]
-            self.emit("FICSGameEnded", game)
+            #self.emit("FICSGameEnded", game)
     
     def onAdjournmentsList (self, adm, adjournments):
         for game in self.values():
@@ -668,7 +670,7 @@ class FICSGames ():
                 if game not in adjournments:
                     del self[game]
                     game.opponent.adjournment = False
-                    self.emit("FICSAdjournedGameRemoved", game)
+                    #self.emit("FICSAdjournedGameRemoved", game)
     
     def onCurGameEnded (self, bm, game):
         for _game in self.values():
@@ -677,7 +679,9 @@ class FICSGames ():
                     if player == _game.opponent:
                         del self[_game]
                         _game.opponent.adjournment = False
-                        self.emit("FICSAdjournedGameRemoved", _game)
+#                        #self.emit("FICSAdjournedGameRemoved", _game)
+
+        self.bm.onGameEnd(self, game)
     
 class FICSSeek:
     def __init__ (self, name, min, inc, rated, color, game_type, rmin=0, rmax=9999):

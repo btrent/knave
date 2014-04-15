@@ -24,7 +24,7 @@ class NewsManager ():
         no, weekday, month, day, title = match.groups()
         line = match.group()
         self.news[no] = [_(weekday), _(month), day, title, ""]
-        self.emit("readingNews", self.news[no])
+        #self.emit("readingNews", self.news[no])
         
         if len(self.news) <= AMOUNT_OF_NEWSITEMS:
             # the "news" command, gives us the latest 10 news items from the
@@ -43,7 +43,7 @@ class NewsManager ():
                     line = " "+line[1:].strip()
                 details += line.replace("  ", " ")
             self.news[no][4] = details
-            self.emit("readNews", self.news[no])
+            #self.emit("readNews", self.news[no])
         
         self.connection.expect_fromto (onFullNewsItem, re.escape(line), "Posted by.*")
         self.connection.client.run_command("news %s" % no)

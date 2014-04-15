@@ -91,18 +91,18 @@ class ArrowButton (OverlayWindow):
     def __onDragMotion (self, arrow, context, x, y, timestamp):
         if not self.hovered and self.__containsPoint(x,y):
             self.hovered = True
-            self.emit("hovered", context.get_source_widget())
+            #self.emit("hovered", context.get_source_widget())
         elif self.hovered and not self.__containsPoint(x,y):
             self.hovered = False
-            self.emit("left")
+            #self.emit("left")
     
     def __onDragLeave (self, arrow, context, timestamp):
         if self.hovered:
             self.hovered = False
-            self.emit("left")
+            #self.emit("left")
     
     def __onDragDrop (self, arrow, context, x, y, timestamp):
         if self.__containsPoint(x,y):
-            self.emit("dropped", context.get_source_widget())
+            #self.emit("dropped", context.get_source_widget())
             context.finish(True, True, timestamp)
             return True

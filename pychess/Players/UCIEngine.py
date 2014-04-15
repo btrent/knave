@@ -87,8 +87,8 @@ class UCIEngine (ProtocolEngine):
         if r == 'die':
             raise PlayerIsDead
         assert r == "ready" or r == 'del'
-        #self.emit("readyForOptions")
-        #self.emit("readyForMoves")
+        ##self.emit("readyForOptions")
+        ##self.emit("readyForMoves")
     
     def __onReadyForOptions_before (self, self_):
         self.readyOptions = True
@@ -150,7 +150,7 @@ class UCIEngine (ProtocolEngine):
             
             finally:
                 # Clear the analyzed data, if any
-                self.emit("analyze", [])
+                #self.emit("analyze", [])
     
     #===========================================================================
     #    Send the player move updates
@@ -369,9 +369,9 @@ class UCIEngine (ProtocolEngine):
     
     def offer (self, offer):
         if offer.type == DRAW_OFFER:
-            self.emit("decline", offer)
+            #self.emit("decline", offer)
         else:
-            self.emit("accept", offer)
+            #self.emit("accept", offer)
     
     #===========================================================================
     #    Option handling
@@ -435,7 +435,7 @@ class UCIEngine (ProtocolEngine):
                         # Many engines don't like positions able to take down enemy
                         # king. Therefore we just return the "kill king" move
                         # automaticaly
-                        self.emit("analyze", [([getMoveKillingKing(self.board)], MATE_VALUE-1)])
+                        #self.emit("analyze", [([getMoveKillingKing(self.board)], MATE_VALUE-1)])
                         return
                     commands.append("position fen %s" % self.board.asFen())
                 else:
@@ -490,11 +490,11 @@ class UCIEngine (ProtocolEngine):
             return
         
         if parts[0] == "uciok":
-            self.emit("readyForOptions")
+            #self.emit("readyForOptions")
             return
         
         if parts[0] == "readyok":
-            self.emit("readyForMoves")
+            #self.emit("readyForMoves")
             return
         
         #------------------------------------------------------- Options parsing
@@ -612,7 +612,7 @@ class UCIEngine (ProtocolEngine):
             if multipv <= len(self.analysis):
                 self.analysis[multipv - 1] = (moves, score)
 
-            self.emit("analyze", self.analysis)
+            #self.emit("analyze", self.analysis)
             return
         
         #-----------------------------------------------  An Analyzer bestmove

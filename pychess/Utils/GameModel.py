@@ -138,7 +138,7 @@ class GameModel (PooledThread):
             self.connections[player].append(player.connect("accept", self.acceptRecieved))
         self.tags["White"] = str(self.players[WHITE])
         self.tags["Black"] = str(self.players[BLACK])
-        self.emit("players_changed")
+        #self.emit("players_changed")
     
     def color (self, player):
         if player is self.players[0]:
@@ -153,7 +153,7 @@ class GameModel (PooledThread):
         
         analyzer.setOptionInitialBoard(self)
         self.spectators[analyzer_type] = analyzer
-        self.emit("analyzer_added", analyzer, analyzer_type)
+        #self.emit("analyzer_added", analyzer, analyzer_type)
         return analyzer
     
     def remove_analyzer (self, analyzer_type):
@@ -163,7 +163,7 @@ class GameModel (PooledThread):
             return
         
         analyzer.end(KILLED, UNKNOWN_REASON)
-        self.emit("analyzer_removed", analyzer, analyzer_type)
+        #self.emit("analyzer_removed", analyzer, analyzer_type)
         del self.spectators[analyzer_type]
         
     def resume_analyzer (self, analyzer_type):
@@ -175,7 +175,7 @@ class GameModel (PooledThread):
         
         analyzer.resume()
         analyzer.setOptionInitialBoard(self)
-        self.emit("analyzer_resumed", analyzer, analyzer_type)
+        #self.emit("analyzer_resumed", analyzer, analyzer_type)
     
     def pause_analyzer (self, analyzer_type):
         try:
@@ -184,7 +184,7 @@ class GameModel (PooledThread):
             return
         
         analyzer.pause()
-        self.emit("analyzer_paused", analyzer, analyzer_type)
+        #self.emit("analyzer_paused", analyzer, analyzer_type)
         
     def restart_analyzer (self, analyzer_type):
         self.remove_analyzer(analyzer_type)
@@ -204,7 +204,7 @@ class GameModel (PooledThread):
             self.tags["ECO"] = opening[0]
             self.tags["Opening"] = opening[1]
             self.tags["Variation"] = opening[2]
-            self.emit("opening_changed")
+            #self.emit("opening_changed")
     
     ############################################################################
     # Board stuff                                                              #
@@ -395,7 +395,7 @@ class GameModel (PooledThread):
             chessfile = loader.load(uri)
         
         self.gameno = gameno
-        self.emit("game_loading", uri)
+        #self.emit("game_loading", uri)
         try:
             chessfile.loadToModel(gameno, position, self)
         #Postpone error raising to make games loadable to the point of the error
@@ -405,7 +405,7 @@ class GameModel (PooledThread):
         if self.players:
             self.players[WHITE].setName(self.tags["White"])
             self.players[BLACK].setName(self.tags["Black"])
-        self.emit("game_loaded", uri)
+        #self.emit("game_loaded", uri)
         
         self.needsSave = False
         if not uriIsFile:
@@ -441,7 +441,7 @@ class GameModel (PooledThread):
             self.uri = None
         saver.save(fileobj, self, position)
         self.needsSave = False
-        self.emit("game_saved", uri)
+        #self.emit("game_saved", uri)
         
     ############################################################################
     # Run stuff                                                                #
@@ -458,7 +458,7 @@ class GameModel (PooledThread):
             player.start()
         
         Log.debug("GameModel.run: emitting 'game_started' self=%s\n" % self)
-        self.emit("game_started")
+        #self.emit("game_started")
         
         # Let GameModel end() itself on games started with loadAndStart()
         self.checkStatus()
@@ -523,7 +523,7 @@ class GameModel (PooledThread):
                 
                 self.checkStatus()
                 
-                self.emit("game_changed")
+                #self.emit("game_changed")
                 
                 for spectator in self.spectators.values():
                     spectator.putMove(self.boards[-1], self.moves[-1], self.boards[-2])
@@ -558,7 +558,7 @@ class GameModel (PooledThread):
             self.__resume()
             self.status = status
             self.reason = UNKNOWN_REASON
-            self.emit("game_unended")
+            #self.emit("game_unended")
    
     def __pause (self):
         Log.debug("GameModel.__pause: %s\n" % self)
@@ -578,14 +578,14 @@ class GameModel (PooledThread):
             self.status = PAUSED
         finally:
             self.applyingMoveLock.release()
-        self.emit("game_paused")
+        #self.emit("game_paused")
     
     def __resume (self):
         for player in self.players:
             player.resume()
         if self.timemodel:
             self.timemodel.resume()
-        self.emit("game_resumed")
+        #self.emit("game_resumed")
     
     @inthread
     def resume (self):
@@ -610,7 +610,7 @@ class GameModel (PooledThread):
         self.status = status
         self.reason = reason
         
-        self.emit("game_ended", reason)
+        #self.emit("game_ended", reason)
         
         self.__pause()
     
@@ -631,7 +631,7 @@ class GameModel (PooledThread):
         if self.timemodel:
             self.timemodel.end()
         
-        self.emit("game_ended", reason)
+        #self.emit("game_ended", reason)
     
     def terminate (self):
         
@@ -646,7 +646,7 @@ class GameModel (PooledThread):
             if self.timemodel:
                 self.timemodel.end()
         
-        self.emit("game_terminated")
+        #self.emit("game_terminated")
     
     ############################################################################
     # Other stuff                                                              #
@@ -672,7 +672,7 @@ class GameModel (PooledThread):
         self.applyingMoveLock.acquire()
         Log.debug("GameModel.undoMoves: self.applyingMoveLock acquired\n")
         try:
-            self.emit("moves_undoing", moves)
+            #self.emit("moves_undoing", moves)
             self.needsSave = True
             
             self.boards = self.variations[0]
@@ -695,7 +695,7 @@ class GameModel (PooledThread):
             Log.debug("GameModel.undoMoves: releasing self.applyingMoveLock\n")
             self.applyingMoveLock.release()
         
-        self.emit("moves_undone", moves)
+        #self.emit("moves_undone", moves)
     
     def isChanged (self):
         if self.ply == 0:
@@ -741,7 +741,7 @@ class GameModel (PooledThread):
         variation[0] = board0
         self.variations.append(head[:board0.ply-self.lowply] + variation)
         self.needsSave = True
-        self.emit("variations_changed")
+        #self.emit("variations_changed")
         return self.variations[-1]
 
     def add_move2variation(self, board, move, variationIdx):
@@ -765,4 +765,4 @@ class GameModel (PooledThread):
         
         self.variations[variationIdx].append(new)
         self.needsSave = True
-        self.emit("variations_changed")
+        #self.emit("variations_changed")
